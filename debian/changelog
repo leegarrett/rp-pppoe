@@ -1,3 +1,93 @@
+rp-pppoe (3.3-1.2) stable-security; urgency=high
+
+  * Non-maintainer upload by the Security Team
+  * Added patch by Max Vozeler <max@hinterhof.net> to ignore -D and -p
+    when pppoe is not running as root to prevent a potential root
+    compromise when pppoe is running setuid root [src/pppoe.c,
+    CAN-2004-0564]
+
+ -- Martin Schulze <joey@infodrom.org>  Wed, 29 Sep 2004 12:09:08 +0200
+
+rp-pppoe (3.3-1.1) unstable; urgency=low
+
+  * Non Maintainer Upload.
+  * mark /etc/ppp/ppp_on_boot.dsl as conffile (closes: #132117)
+  * use full path in /etc/ppp/peers/dsl-provider ppp_on_boot.dsl 
+    (closes: #111551)
+  * small fix so can build on potato (closes: #117316)
+  * remove references to adsl-* in manpages and point user to 
+    /usr/share/doc/pppoe/README.Debian (closes: #71840)
+
+ -- David Kimdon <dwhedon@debian.org>  Sun,  3 Feb 2002 16:44:55 -0800
+
+rp-pppoe (3.3-1) unstable; urgency=low
+
+  * New upstream release. (Closes: #113885)
+  * Default to "-m 1452" in dsl-provider. (Closes: #113300)
+
+ -- Christian Hudon <chrish@debian.org>  Thu,  1 Nov 2001 15:28:10 -0500
+
+rp-pppoe (3.2-1) unstable; urgency=low
+
+  * New upstream release.
+  * Replaced wrapper by patch from Eduard Bloch that makes pppoe bring
+    the interface up if it wasn't up. (Closes: #106970)
+  * Bugs fixed in this or a previous release: 
+    closes: #94540, #83918, #70834, #72065, #80137, #86226, #79319, #75443, #67863, #79529, #88499, #91330.
+
+ -- Christian Hudon <chrish@debian.org>  Mon, 20 Aug 2001 19:26:45 -0400
+
+rp-pppoe (3.0-4) unstable; urgency=high
+
+  * Remove -arp switch from ppp_on_boot and pppoe wrapper. This breaks
+    networks were the DSL modem is connected to a hub and not directly to
+    a network interface. (Closes: #100833)
+
+ -- Christian Hudon <chrish@debian.org>  Thu, 14 Jun 2001 13:52:42 -0400
+
+rp-pppoe (3.0-3) unstable; urgency=low
+
+  * Added instructions on how to set up pppoe to work with pon, for people
+    that are billed by their DSL provider for minutes connected. (Which is
+    somewhat odd...)
+  * Wrapper around pppoe to automatically bring up the interface that will
+    be used by pppoe. Needed for pon support because /etc/network/interfaces
+    doesn't support bringing up an interface without assigning it an
+    IP address, and pon doesn't support the execution of arbitrary
+    commands before the execution of pppd. (Well, except for ppp_on_boot,
+    which we don't want to use in this case.)
+  * Also added instructions on how to use demand-dialing.
+  * Corrected thinko in README.Debian file.
+
+ -- Christian Hudon <chrish@debian.org>  Mon, 11 Jun 2001 15:44:47 -0400
+
+rp-pppoe (3.0-2) unstable; urgency=low
+
+  * New upstream release.
+  * Rewrote and simplified installation instructions. (Next version will
+    hopefully also offer a debconf install.)
+  * Added user-contributed tips section to the README.Debian file.
+  * Modifications and improvements from changes suggested by Eduard Bloch.
+
+ -- Christian Hudon <chrish@debian.org>  Wed, 23 May 2001 00:41:29 -0400
+
+rp-pppoe (2.8-0.1) unstable; urgency=low
+
+  * NMU.
+  * New upstream version. (Closes: #83918, #72065, #80137)
+  * Changed debian/rules to install everything, then remove the
+    unwanted scripts.
+  * Corrected Source-Depends to Build-Depends, and added debhelper and
+    ppp.
+
+ -- Daniel Schepler <schepler@debian.org>  Sat, 17 Mar 2001 22:21:59 -0800
+
+rp-pppoe (1.7-1) unstable; urgency=low
+
+  * Updated to latest upstream release.
+
+ -- Christian Hudon <chrish@debian.org>  Fri, 21 Apr 2000 15:14:57 -0400
+
 rp-pppoe (1.0-1) unstable; urgency=low
 
   * Upgraded to new upstream release.

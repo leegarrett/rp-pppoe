@@ -9,16 +9,20 @@ export DH_COMPAT=1
 build: build-stamp
 build-stamp:
 	dh_testdir
-	test -f configure || (aclocal; autoconf)
-	test -f Makefile || ./configure
-	$(MAKE)
+#	test -f configure || (aclocal; autoconf)
+	test -f src/Makefile || (cd src && ./configure)
+	$(MAKE) -C src
 	touch build-stamp
 
 clean:
 	dh_testdir
 	dh_testroot
 	rm -f build-stamp
-	-$(MAKE) clean
+	-rm -f pppoe.prj
+	-$(MAKE) -C src distclean
+	-$(MAKE) -C gui distclean
+	rm -f src/pppoe-relay
+	-rm -f debian/substvars.debhelper
 	dh_clean
 
 # Build architecture-independent files here.
@@ -27,22 +31,28 @@ binary-indep: build
 
 # Build architecture-dependent files here.
 binary-arch: build
-	dh_testversion 1
 	dh_testdir
 	dh_testroot
 	dh_clean -k
-	dh_installdirs usr/sbin etc/ppp/peers
-	install -s -m 0755 -o root -g root pppoe debian/tmp/usr/sbin/pppoe
+	dh_installdirs usr/sbin usr/share
+	$(MAKE) -C src install RPM_INSTALL_ROOT="`pwd`/debian/tmp"
+# Now clean out unwanted things, and move others to their places
+	rm -rf debian/tmp/etc/ppp debian/tmp/usr/doc
+	rm -rf debian/tmp/usr/man/man5  # pppoe.conf manpage
+	rm -f debian/tmp/usr/sbin/adsl-* debian/tmp/usr/man/man8/adsl-*
+	dh_installdirs etc/ppp/peers
+	mv debian/tmp/usr/man debian/tmp/usr/share/man
 	install -m 0640 -o root -g dip debian/dsl-provider debian/tmp/etc/ppp/peers/dsl-provider
-	dh_installdocs
+	install -m 750 -o root -g dip debian/ppp_on_boot.dsl debian/tmp/etc/ppp
+	dh_installdocs doc/KERNEL-MODE-PPPOE
 	dh_installexamples
-	dh_installmanpages
-	dh_installchangelogs
+#	dh_installmanpages
+	dh_installchangelogs doc/CHANGES
 	dh_link
 	dh_strip
 	dh_compress
-	dh_fixperms
-	dh_suidregister
+#	dh_fixperms
+#	dh_suidregister
 	dh_installdeb
 	dh_shlibdeps
 	dh_gencontrol

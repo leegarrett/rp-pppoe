@@ -1,6 +1,12 @@
 pppoe: a PPP-over-Ethernet redirector for pppd
-Copyright (C) 1999 Roaring Penguin Software Inc.
+Copyright (C) 2001 Roaring Penguin Software Inc.
+
 Much inspiration from an earlier client by Luke Stras.
+
+The MSS clamping was inspired by mssclampfw by Marc Boucher <marc@mbsi.ca>
+with acknowledgements to Rebel.com (http://www.rebel.com).  However, the
+actual MSS clamping code is original and is licensed under the GPL, unlike
+the original mssclampfw.
 
 Introduction
 ============
@@ -9,83 +15,73 @@ pppoe is a user-space redirector which permits the use of PPPoE
 (Point-to-Point Over Ethernet) with Linux.  PPPoE is used by many
 ADSL service providers.
 
-To read the manual page, type:
-
-	nroff -man pppoe.8 | more
-
 Installation
 ============
 
 Requirements
 ------------
 
-1) Linux 2.2.9 or later (may work on other platforms, but untested)
-                      has been tested on Intel platforms
-   OR
-   Linux 2.0.36 or later (UNTESTED)
+1) Linux 2.2.9 or later on Intel, Sparc or PowerPC.  It may work on
+   Alpha, too -- anyone care to let me know?
 
-2) pppd 2.3.10 or later.  Versions 2.3.7 and later are rumored to work,
-   but I haven't tested them personally.
+	   OR
+
+   Linux 2.0.36 or later.
+
+	   OR
+
+   FreeBSD, NetBSD or OpenBSD with BPF support.  I have access only
+   to FreeBSD.  In general, I can't answer questions about the *BSD's
+   as well as I can about Linux.
+
+
+2) pppd 2.3.10 or later.  Versions 2.3.7 and later work unless you use
+   demand-dialling.  For demand dialling, you *must* use 2.3.10 or later.
+
+QUICKSTART
+----------
+
+If you're lucky, the "quickstart" method will work.  After unpacking
+the archive, become root and type:
+
+	./go
+
+This should configure, compile and install the software and set up your
+ADSL connection.  You'll have to answer a few questions along the way.
+
+If you want the GUI wrapper, type:
+
+	./go-gui
+
+If ./go and ./go-gui didn't work, read the rest of this README.
 
 Compiling
 ---------
 
-Compile and install pppd.  Then:
+Compile and install pppd if you don't already have it.  Then:
 
 1) Unpack:
 
-# tar xzvf rp-pppoe-xxx.tar.gz
+	$ tar xzvf rp-pppoe-xxx.tar.gz
 
-2) Configure:
+2) Change to source directory:
 
-# ./configure
+	$ cd src
 
-3) Compile:
+3) Configure:
 
-# make
+	$ ./configure
 
-4) Install to some convenient directory:
+4) Compile:
 
-# cp pppoe /usr/local/bin
+	$ make
 
-5) Create an appropriate secrets file.  For example, Sympatico ADSL uses
-PAP for authentication, so we need an /etc/ppp/pap-secrets file.  The
-file consists of three columns, separated by whitespace.  The first
-column is the user name.  For Sympatico, this is the Sympatico Member
-ID (b1*).  This is case sensitive, and you must add '@sympatico.ca' to
-the end.  The second entry is the server name.  This should be '*'.
-The third entry is the secret.  For Sympatico users, this will be your
-Sympatico password.  So a sample /etc/ppp/pap-secrets file might look
-like:
+4) Install (this step must be done as root)
 
-b1aaaaaa@sympatico.ca * password
+	# make install
 
-6) Make sure your Ethernet interface is up:
-
-ifconfig eth0 up
-
-7) Set up DNS.  If your ISP gave you the IP addresses of DNS servers, put
-   lines in /etc/resolv.conf which look like this:
-
-	nameserver ip_addr_of_first_dns_server
-	nameserver ip_addr_of_second_dns_server
-
-For example:
-
-	nameserver 204.101.251.1
-	nameserver 204.101.251.2
-
-8) Then, start pppd like this:
-
-pppd pty '/usr/local/bin/pppoe -I eth0' noipdefault defaultroute \
-     hide-password passive persist name b1aaaaaa@sympatico.ca
-
-See the script "adsl-connect" for a robust connection script which
-restarts the link if it goes down.  See "HOW-TO-CONNECT" for a simple
-recipe for making an ADSL connection and answers to common problems.
-The "adsl-state.pl" script examines your log files and summarizes the
-availability of your connection.
+5) Now read doc/HOW-TO-CONNECT
 
 --
-David F. Skoll                 | Roaring Penguin Software Inc.
-http://www.roaringpenguin.com  | Linux and UNIX Specialists
+David F. Skoll <dfs@roaringpenguin.com> | Roaring Penguin Software Inc.
+http://www.roaringpenguin.com           | Linux and UNIX Specialists

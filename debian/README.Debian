@@ -1,37 +1,101 @@
-		  How to setup your DSL PPPoE connection
+		  How to Setup your DSL PPPoE Connection
 
-Do the following steps as root:
+To get pppoe running, you will need to fill in at least the three following
+pieces of information:
 
-1. Edit the file pap-secrets file, adding a line to the outbound
+a) your user name (given to you by your DSL provider)
+b) your password
+c) the Ethernet interface your DSL modem is connected (if you have more
+than one Ethernet card)
+
+To do this, follow the following steps while logged in as root:
+
+1. Edit the file /etc/ppp/pap-secrets file, adding a line to the outbound
 connections sections that has the following format:
 
 username@sympatico.ca	  sympatico.ca	    password
 
-Replace 'username' by the username your DSL provider gave you and 'password'
+Replace "username" by the username your DSL provider gave you and "password"
 by your password. This assumes that your provider is Sympatico. If it is
 not, you will also need to replace 'sympatico.ca' by the address of your
-provider.
+provider. (T-DSL users from Germany may want to have a look at the end of
+this file for hints on figuring out the username that ppp needs.)
 
-2. Edit the file /etc/ppp/peers/dsl-provider, adding a line that reads:
+2. In the file /etc/ppp/peers/dsl-provider, uncomment and edit the "user" line.
+Using our example of "username@sympatico.ca" the line should then look like
+this:
 
 user username@sympatico.ca
 
-where what follows 'user' is identical to the first part of the line you
-added to pap-secrets (here 'username@sympatico.ca').
+with what follows 'user' being identical to the first part of the line you
+added to pap-secrets.
 
-3. Edit the file /etc/init.d/network, adding a line that says:
+3. If you have more than one Ethernet card in your computer, replace the
+"eth0" in the files /etc/ppp/ppp_on_boot.dsl and /etc/ppp/peers/dsl-provider 
+by the interface your DSL modem is plugged in.
 
-ifconfig eth0 up
+4. Now, to bring your connection up, do one of the following:
 
-4. Edit the file /etc/init.d/ppp. Find the line in the 'start' section that
-starts pppd and replace the word 'provider' by 'dsl-provider'. That line
-should now look like:
+ a) If you want your connection to come up automatically (either for an
+ always-on connection or if you are using demand-dialing), create a symlink
+ to the file ppp_on_boot.dsl called ppp_on_boot by typing the following
+ commands into a shell window as root:
 
-start-stop-daemon --start --quiet --exec /usr/sbin/pppd -- call dsl-provider
+   cd /etc/ppp
+   ln -s ppp_on_boot.dsl ppp_on_boot
 
-5. Create an empty file /etc/ppp/ppp_on_boot by running the command "touch
-/etc/ppp/ppp_on_boot".
+ To start your pppoe connection, execute "/etc/init.d/ppp start". The
+ connection will also come up automatically the next time you boot.
 
-Your DSL PPPoE connection is now set up. To start it, execute
-"/etc/init.d/ppp start". The connection will come up automatically the next
-time you boot.
+ (Note that for demand-dialing, you will need to edit the
+ /etc/ppp/peers/dsl-provider file and uncomment the lines in section 2.)
+
+ b) If you want to bring your connection up manually (because your DSL
+ provider charges per minute connected), simply type "pon dsl-provider" to
+ bring the connection up and "poff" to bring it down.
+
+In both cases, running the "plog" command, you should see in one of the
+lines something line "pppd[216]: Connect: ppp0 <--> eth0". which means that
+the connection came up successfully.
+
+------
+
+		     User-Contributed Hints and Tips
+
+- If the connection comes up without problems (i.e. no ppp errors show
+  up when you execute the "plog" command) but no data can be send or
+  received, check using the "route" command if there is another default
+  route (aka gateway) when you start the connection. If so try deleting this
+  route, by removing the corresponding "gateway" line in the 
+  /etc/network/interfaces file.
+
+- If your provider didn't give you out the addresses of the DNS servers you
+  should be using, you may be able to get these addresses by putting the
+  keyword usepeerdns into the /etc/ppp/peers/dsl-provider file and restarting
+  ppp. Once the connection is up, have a look at the /etc/ppp/resolv.conf
+  that was created and copy over the "nameserver" lines into your
+  /etc/resolv.conf file.
+
+- If your machine is a gateway for a LAN, the clients may have problems
+  connecting to some sites. To avoid this problem, you need to clamp MSS
+  size, using the "-m" option of pppoe. Example lines doing this are provided
+  in the /etc/ppp/peers/dsl-provider file supplied with this package.
+
+- German T-DSL user may find the following example useful in figuring out
+  the correct user name for ppp. (Taken from
+  http://www.adsl4linux.de/software/tonline_rp-pppoe.html)
+
+   _________________________________________________________
+  /                                                         \
+  | Anschlusskennung: 11111111111                            |
+  | T-Onlinenummer: 222222222222                             |
+  | Mitbenutzer: 0001                                        |
+  | Passwort: geHeim                                         |
+  |                                                          |
+  | Listing 1: /etc/ppp/pap-secrets                          |
+  |                                                          |
+  | # Secrets for authentication using PAP                   |
+  | # client      server      secret      IP addresses       |
+  |                                                          |
+  | "111111111111222222222222#0001@t-online.de"  *  "geHeim" |
+  \_________________________________________________________/

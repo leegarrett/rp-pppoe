@@ -1,0 +1,248 @@
+
+*** Beginning merge of project pppoe
+
+User:             chrish
+Date:             Thu, 01 Nov 2001 15:11:43 -0500
+Common version:   3_2.1
+Selected version: 3_2-1.1
+Working version:  3_3.1(w)
+
+*** Action on file `go-gui'
+No prompt for file `go-gui' by rule 1
+
+*** Action on file `rp-pppoe-gui.spec'
+Do nothing with file `rp-pppoe-gui.spec' by rule 6
+
+*** Action on file `SERVPOET'
+No prompt for file `SERVPOET' by rule 1
+
+*** Action on file `rp-pppoe.spec'
+No prompt for file `rp-pppoe.spec' by rule 4
+
+*** Action on file `scripts/adsl-init.in'
+No prompt for file `scripts/adsl-init.in' by rule 1
+
+*** Action on file `scripts/adsl-init-suse.in'
+No prompt for file `scripts/adsl-init-suse.in' by rule 1
+
+*** Action on file `scripts/adsl-status'
+No prompt for file `scripts/adsl-status' by rule 1
+
+*** Action on file `scripts/adsl-connect.in'
+No prompt for file `scripts/adsl-connect.in' by rule 4
+
+*** Action on file `scripts/adsl-setup.in'
+No prompt for file `scripts/adsl-setup.in' by rule 1
+
+*** Action on file `scripts/adsl-stop.in'
+No prompt for file `scripts/adsl-stop.in' by rule 1
+
+*** Action on file `scripts/adsl-start.in'
+No prompt for file `scripts/adsl-start.in' by rule 1
+
+*** Action on file `scripts/adsl-init-turbolinux.in'
+No prompt for file `scripts/adsl-init-turbolinux.in' by rule 1
+
+*** Action on file `README'
+No prompt for file `README' by rule 1
+
+*** Action on file `configs/pppoe.conf'
+No prompt for file `configs/pppoe.conf' by rule 4
+
+*** Action on file `configs/pap-secrets'
+No prompt for file `configs/pap-secrets' by rule 1
+
+*** Action on file `configs/pppoe-server-options'
+No prompt for file `configs/pppoe-server-options' by rule 1
+
+*** Action on file `configs/firewall-standalone'
+No prompt for file `configs/firewall-standalone' by rule 1
+
+*** Action on file `configs/firewall-masq'
+No prompt for file `configs/firewall-masq' by rule 1
+
+*** Action on file `src/plugin.c'
+No prompt for file `src/plugin.c' by rule 4
+
+*** Action on file `src/pppoe.h'
+No prompt for file `src/pppoe.h' by rule 4
+
+*** Action on file `src/pppoe.c'
+Copied working file `src/pppoe.c' to `src/obsolete/pppoe.c.v0'
+Merge file `src/pppoe.c' by rule 2
+
+*** Action on file `src/pppoe-server.h'
+No prompt for file `src/pppoe-server.h' by rule 1
+
+*** Action on file `src/pppoe-server.c'
+No prompt for file `src/pppoe-server.c' by rule 4
+
+*** Action on file [directory:src/plugin]
+No prompt for file [directory:src/plugin] by rule 1
+
+*** Action on file `src/config.h.in'
+No prompt for file `src/config.h.in' by rule 1
+
+*** Action on file `src/Makefile.in'
+Copied working file `src/Makefile.in' to `src/obsolete/Makefile.in.v0'
+Merge file `src/Makefile.in' by rule 2
+
+*** Action on file `src/common.c'
+No prompt for file `src/common.c' by rule 1
+
+*** Action on file `src/install-sh'
+No prompt for file `src/install-sh' by rule 1
+
+*** Action on file `src/configure.in'
+No prompt for file `src/configure.in' by rule 4
+
+*** Action on file `src/configure'
+No prompt for file `src/configure' by rule 4
+
+*** Action on file `src/ppp.c'
+No prompt for file `src/ppp.c' by rule 1
+
+*** Action on file `src/md5.h'
+No prompt for file `src/md5.h' by rule 1
+
+*** Action on file `src/md5.c'
+No prompt for file `src/md5.c' by rule 1
+
+*** Action on file `src/discovery.c'
+No prompt for file `src/discovery.c' by rule 1
+
+*** Action on file `src/relay.h'
+No prompt for file `src/relay.h' by rule 1
+
+*** Action on file `src/relay.c'
+No prompt for file `src/relay.c' by rule 1
+
+*** Action on file `src/pppoe-sniff.c'
+No prompt for file `src/pppoe-sniff.c' by rule 1
+
+*** Action on file `src/debug.c'
+No prompt for file `src/debug.c' by rule 1
+
+*** Action on file `src/if.c'
+No prompt for file `src/if.c' by rule 4
+
+*** Action on file `man/pppoe.8'
+No prompt for file `man/pppoe.8' by rule 1
+
+*** Action on file `man/pppoe-relay.8'
+No prompt for file `man/pppoe-relay.8' by rule 1
+
+*** Action on file `man/pppoe-server.8'
+No prompt for file `man/pppoe-server.8' by rule 4
+
+*** Action on file `man/adsl-connect.8'
+No prompt for file `man/adsl-connect.8' by rule 1
+
+*** Action on file `man/pppoe.conf.5'
+No prompt for file `man/pppoe.conf.5' by rule 1
+
+*** Action on file `man/adsl-stop.8'
+No prompt for file `man/adsl-stop.8' by rule 1
+
+*** Action on file `man/adsl-start.8'
+No prompt for file `man/adsl-start.8' by rule 1
+
+*** Action on file `man/adsl-status.8'
+No prompt for file `man/adsl-status.8' by rule 1
+
+*** Action on file `man/pppoe-sniff.8'
+No prompt for file `man/pppoe-sniff.8' by rule 1
+
+*** Action on file `man/adsl-setup.8'
+No prompt for file `man/adsl-setup.8' by rule 1
+
+*** Action on file `gui/wrapper.c'
+No prompt for file `gui/wrapper.c' by rule 1
+
+*** Action on file `gui/Makefile.in'
+No prompt for file `gui/Makefile.in' by rule 1
+
+*** Action on file `gui/tkpppoe.in'
+No prompt for file `gui/tkpppoe.in' by rule 4
+
+*** Action on file `gui/pppoe-wrapper.1'
+No prompt for file `gui/pppoe-wrapper.1' by rule 1
+
+*** Action on file `gui/tkpppoe.1'
+No prompt for file `gui/tkpppoe.1' by rule 1
+
+*** Action on file `gui/html/props-options.png'
+No prompt for file `gui/html/props-options.png' by rule 1
+
+*** Action on file `gui/html/mainwin-busy.png'
+No prompt for file `gui/html/mainwin-busy.png' by rule 1
+
+*** Action on file `gui/html/props-advanced.png'
+No prompt for file `gui/html/props-advanced.png' by rule 1
+
+*** Action on file `gui/html/mainwin.png'
+No prompt for file `gui/html/mainwin.png' by rule 1
+
+*** Action on file `gui/html/props-basic.png'
+No prompt for file `gui/html/props-basic.png' by rule 1
+
+*** Action on file `gui/html/mainwin-nonroot.png'
+No prompt for file `gui/html/mainwin-nonroot.png' by rule 1
+
+*** Action on file `gui/html/props-nic.png'
+No prompt for file `gui/html/props-nic.png' by rule 1
+
+*** Action on file `gui/html/tkpppoe.html'
+No prompt for file `gui/html/tkpppoe.html' by rule 1
+
+*** Action on file `doc/CHANGES'
+No prompt for file `doc/CHANGES' by rule 4
+
+*** Action on file `doc/HOW-TO-CONNECT'
+No prompt for file `doc/HOW-TO-CONNECT' by rule 1
+
+*** Action on file `doc/PROBLEMS'
+No prompt for file `doc/PROBLEMS' by rule 1
+
+*** Action on file `doc/KERNEL-MODE-PPPOE'
+No prompt for file `doc/KERNEL-MODE-PPPOE' by rule 1
+
+*** Action on file `doc/LICENSE'
+No prompt for file `doc/LICENSE' by rule 1
+
+*** Action on file `go'
+No prompt for file `go' by rule 1
+
+*** Action on file `debian/copyright'
+Add file `debian/copyright' by rule 14
+
+*** Action on file `debian/dsl-provider'
+Add file `debian/dsl-provider' by rule 14
+
+*** Action on file `debian/README.Debian'
+Add file `debian/README.Debian' by rule 14
+
+*** Action on file `debian/pppoe.wrapper'
+Add file `debian/pppoe.wrapper' by rule 14
+
+*** Action on file `debian/changelog'
+Add file `debian/changelog' by rule 14
+
+*** Action on file `debian/ppp_on_boot.dsl'
+Add file `debian/ppp_on_boot.dsl' by rule 14
+
+*** Action on file `debian/conffiles'
+Add file `debian/conffiles' by rule 14
+
+*** Action on file `debian/rules'
+Add file `debian/rules' by rule 14
+
+*** Action on file `debian/control'
+Add file `debian/control' by rule 14
+
+*** Action on populate ignore element `~$'
+No prompt for populate ignore element `~$' by rule 1
+
+
+*** Merge complete
+

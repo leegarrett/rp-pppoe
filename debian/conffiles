@@ -1,1 +1,2 @@
 /etc/ppp/peers/dsl-provider
+/etc/ppp/ppp_on_boot.dsl

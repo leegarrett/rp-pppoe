@@ -3,7 +3,7 @@ Maintainer: Christian Hudon <chrish@debian.org>
 Standards-Version: 3.1.1.0
 Section: net
 Priority: optional
-Source-Depends: autoconf
+Build-Depends: debhelper, ppp (>= 2.3.10)
 
 Package: pppoe
 Architecture: any
