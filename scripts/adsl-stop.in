@@ -8,10 +8,12 @@
 #
 # Copyright (C) 2000 Roaring Penguin Software Inc.
 #
-# $Id: adsl-stop.in,v 1.4 2001/04/02 13:59:14 dfs Exp $
+# $Id: adsl-stop.in,v 1.5 2002/04/09 17:28:39 dfs Exp $
 #
 # This file may be distributed under the terms of the GNU General
 # Public License.
+#
+# LIC: GPL
 #
 # Usage: adsl-stop [config_file]
 # If config_file is omitted, defaults to /etc/ppp/pppoe.conf

@@ -1,3 +1,24 @@
+# LIC: GPL
+
+Changes from Version 3.4 to 3.5:
+
+- Fixes for compilation on Solaris.
+
+Changes from Version 3.3 to 3.4:
+
+- INCOMPATIBILITY WITH EARLIER VERSIONS:
+  Kernel-mode plugin now is built against latest CVS ppp source rather than
+  Michal Ostrowski's patched version.  If you use kernel-mode PPPoE, you
+  MUST use the CVS version of the ppp source code with rp-pppoe 3.4.
+
+- Print PPPoE session number when connection terminates.  Thanks to
+  Alexander Dalloz for suggesting this.
+
+- Fixed a bug in MSS clamping -- it now works with protocol-field compression.
+  Thanks to Gerd v. Egidy for the patch.
+
+- Ignore SIGINT and SIGTERM so LCP termination packets make it out.
+
 Changes from Version 3.2 to 3.3:
 
 - Client works on Solaris again.  It was broken in 3.2.
@@ -207,4 +228,4 @@ Changes from Version 1.7 to 1.8:
 
 - Made pppoe send a PADT frame if connection is terminated
 
-$Id: CHANGES,v 1.16 2001/09/14 19:13:22 dfs Exp $
+$Id: CHANGES,v 1.21 2002/07/08 14:31:02 dfs Exp $

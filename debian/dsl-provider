@@ -19,14 +19,14 @@
 # for most people.
 pty "/usr/sbin/pppoe -I eth0 -T 80 -m 1452"
 
+# An even more conservative version of the previous line, if things
+# don't work using -m 1452... 
+#pty "/usr/sbin/pppoe -I eth0 -T 80 -m 1412"
+
 # If the computer connected to the Internet using pppoe is not being used
 # by other computers as a gateway to the Internet, you can try the following
 # line instead, for a small gain in speed:
 #pty "/usr/sbin/pppoe -I eth0 -T 80"
-
-# An even more conservative version of the previous line, if things
-# don't work using -m 1452... 
-#pty "/usr/sbin/pppoe -I eth0 -T 80 -m 1412"
 
 
 # The following two options should work fine for most DSL users.
@@ -34,7 +34,10 @@ pty "/usr/sbin/pppoe -I eth0 -T 80 -m 1452"
 # Assumes that your IP address is allocated dynamically
 # by your DSL provider...
 noipdefault
-# Comment out if you already have the correct default route installed
+# Try to get the name server addresses from the ISP.
+usepeerdns
+# Use this connection as the default route.
+# Comment out if you already have the correct default route installed.
 defaultroute
 
 ##
@@ -61,3 +64,11 @@ connect /bin/true
 noauth
 persist
 mtu 1492
+
+# RFC 2516, paragraph 7 mandates that the following options MUST NOT be
+# requested and MUST be rejected if requested by the peer:
+# Address-and-Control-Field-Compression (ACFC)
+noaccomp
+# Asynchronous-Control-Character-Map (ACCM)
+default-asyncmap
+

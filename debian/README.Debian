@@ -31,8 +31,8 @@ with what follows 'user' being identical to the first part of the line you
 added to pap-secrets.
 
 3. If you have more than one Ethernet card in your computer, replace the
-"eth0" in the files /etc/ppp/ppp_on_boot.dsl and /etc/ppp/peers/dsl-provider 
-by the interface your DSL modem is plugged in.
+"eth0" in the /etc/ppp/peers/dsl-provider file by the interface your DSL
+modem is plugged in.
 
 4. Now, to bring your connection up, do one of the following:
 
@@ -62,19 +62,24 @@ the connection came up successfully.
 
 		     User-Contributed Hints and Tips
 
+- The following kernel options needs to be enabled to run pppoe:
+  CONFIG_PPP, CONFIG_PPP_ASYNC.
+
+- The Debian pppoe program is patched to automatically bring up the
+  Ethernet interface.
+
 - If the connection comes up without problems (i.e. no ppp errors show
   up when you execute the "plog" command) but no data can be send or
   received, check using the "route" command if there is another default
   route (aka gateway) when you start the connection. If so try deleting this
   route, by removing the corresponding "gateway" line in the 
   /etc/network/interfaces file.
+  You may find useful the replacedefaultroute pppd keywork.
 
-- If your provider didn't give you out the addresses of the DNS servers you
-  should be using, you may be able to get these addresses by putting the
-  keyword usepeerdns into the /etc/ppp/peers/dsl-provider file and restarting
-  ppp. Once the connection is up, have a look at the /etc/ppp/resolv.conf
-  that was created and copy over the "nameserver" lines into your
-  /etc/resolv.conf file.
+- If the usepeerdns keyword is used in /etc/ppp/peers/dsl-provider,
+  once the connection is up the default pppd configuration will
+  automatically update /etc/resolv.conf with the name server addresses
+  provided by your ISP.
 
 - If your machine is a gateway for a LAN, the clients may have problems
   connecting to some sites. To avoid this problem, you need to clamp MSS
@@ -99,3 +104,22 @@ the connection came up successfully.
   |                                                          |
   | "111111111111222222222222#0001@t-online.de"  *  "geHeim" |
   \_________________________________________________________/
+
+  Due to the presence of a "#" character in the username, the username will
+  need quoting in the dsl-provider file, like this:
+
+    user "111111111111222222222222#0001@t-online.de"
+
+- RFC 2516 paragraph 7 mandates that the following options MUST NOT be
+  requested and MUST be rejected if requested by the peer:
+   - Field Check Sequence (FCS) Alternatives
+   - Address-and-Control-Field-Compression (ACFC)
+   - Asynchronous-Control-Character-Map (ACCM)
+  The first option is not implemented by pppd, the others are disabled with
+  the keywords noaccomp and default-asyncmap in /etc/ppp/peers/dsl-provider.
+  Removing them (especially default-asyncmap) may break your connection.
+  The use of default-asyncmap will not cause a connection slowdown because
+  even if the default asyncmap is FFFFFFFF, it can be used only with ttys.
+
+
+ -- Christian Hudon <chrish@debian.org>, Tue Sep 16 14:08:08 2003

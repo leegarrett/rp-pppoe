@@ -1,3 +1,5 @@
+# LIC: GPL
+
 RP-PPPoE now supports kernel-mode PPPoE on Linux kernels 2.4.x.  However,
 the default "./go" build procedure does not make kernel-mode support.
 
@@ -7,11 +9,11 @@ Here's what you need to do:
 rp-pppoe on.  You must have the following kernel configuration settings:
 
 	CONFIG_PPP=m          or CONFIG_PPP=y
-	CONFIG_PPP_ASYNC=m    or CONFIG_PPP_ASYNC=y 
-	CONFIG_PPP_SYNC_TTY=m or CONFIG_PPP_SYNC_TTY=y 
-	CONFIG_PPP_DEFLATE=m  or CONFIG_PPP_DEFLATE=y 
-	CONFIG_PPP_BSDCOMP=m  or CONFIG_PPP_BSDCOMP=y 
-	CONFIG_PPPOE=m        or CONFIG_PPPOE=y 
+	CONFIG_PPP_ASYNC=m    or CONFIG_PPP_ASYNC=y
+	CONFIG_PPP_SYNC_TTY=m or CONFIG_PPP_SYNC_TTY=y
+	CONFIG_PPP_DEFLATE=m  or CONFIG_PPP_DEFLATE=y
+	CONFIG_PPP_BSDCOMP=m  or CONFIG_PPP_BSDCOMP=y
+	CONFIG_PPPOE=m        or CONFIG_PPPOE=y
 	CONFIG_N_HDLC=m       or CONFIG_N_HDLC=y
 	CONFIG_UNIX98_PTYS=y
 
@@ -27,32 +29,33 @@ You might want to add these lines to /etc/modules.conf:
 	alias tty-ldisc-14 ppp_synctty
 	alias net-pf-24 pppoe
 
-1) Download Michal Ostrowski's patched version of pppd which supports
-a PPPoE plugin.  The latest version as of this writing is
-at http://www.shoshin.uwaterloo.ca/~mostrows/ in
-http://www.shoshin.uwaterloo.ca/~mostrows/ppp-2.4.1-pppoe2.tgz.  It is
-also mirrored at http://www.roaringpenguin.com/pppoe/
+1) Check out the latest version of the PPP software from the CVS
+repository at cvs.samba.org.  Here's how to do this:
 
-2) Unpack that version of pppd and build and install it.
+	cvs -d :pserver:cvs@pserver.samba.org:/cvsroot login
+	# When prompted for a password, type "cvs"
 
-3) In the SAME DIRECTORY in which you unpacked Michal's patched pppd, unpack
-   rp-pppoe.  That is, you should see the directories:
+	# Change to the directory in which you want to store the PPP source
+	# code.
+	cd /path/to/checked/out/sources
 
-	ppp-2.4.1.pppoe2
-	rp-pppoe-X.y
+	# Check out the source
+	cvs -z5 -d :pserver:cvs@pserver.samba.org:/cvsroot co ppp
 
-   in the same directory.
-	
+2) The source gets checked out into a subdirectory called ppp.  If
+the source ends up in /path/to/checked/out/sources/ppp, then call
+that path $PPPDIR.
+
+Build and install the checked-out ppp code according to its instructions.
+
+3) Unpack rp-pppoe.
+
 3) In the rp-pppoe directory, change to src/ and type:
 
-	./configure --enable-plugin
+	./configure --enable-plugin=$PPPDIR
 
-If you didn't unpack ppp-2.4.1.pppoe2 where I suggested, then use:
-
-	./configure --enable-plugin=/path/to/ppp-tree
-
-Here, /path/to/ppp-tree is where you unpacked the pppd software.  It
-should be the directory named ppp-2.4.2.pppoe2
+where $PPPDIR, of course, refers to the checked-out "ppp" directory
+from cvs.samba.org.
 
 4) Type make; make install
 

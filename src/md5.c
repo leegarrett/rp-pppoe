@@ -9,6 +9,8 @@
  * except that you don't need to include two pages of legalese
  * with every copy.
  *
+ * LIC: GPL
+ *
  * To compute the message digest of a chunk of bytes, declare an
  * MD5Context structure, pass it to MD5Init, call MD5Update as
  * needed on buffers full of bytes, and then call MD5Final, which
@@ -97,7 +99,7 @@ void MD5Update(struct MD5Context *ctx, unsigned char const *buf, unsigned len)
 }
 
 /*
- * Final wrapup - pad to 64-byte boundary with the bit pattern 
+ * Final wrapup - pad to 64-byte boundary with the bit pattern
  * 1 0* (64-bit count of bits processed, MSB-first)
  */
 void MD5Final(unsigned char digest[16], struct MD5Context *ctx)

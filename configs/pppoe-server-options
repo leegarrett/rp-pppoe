@@ -1,4 +1,5 @@
 # PPP options for the PPPoE server
+# LIC: GPL
 require-pap
 login
 lcp-echo-interval 10

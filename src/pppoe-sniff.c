@@ -10,10 +10,12 @@
 * This program may be distributed according to the terms of the GNU
 * General Public License, version 2 or (at your option) any later version.
 *
+* LIC: GPL
+*
 ***********************************************************************/
 
 static char const RCSID[] =
-"$Id: pppoe-sniff.c,v 1.5 2001/03/12 17:40:42 dfs Exp $";
+"$Id: pppoe-sniff.c,v 1.7 2002/04/09 17:28:39 dfs Exp $";
 
 #include "pppoe.h"
 
@@ -158,7 +160,7 @@ main(int argc, char *argv[])
     PPPoEPacket pkt;
     int size;
 #ifdef USE_DLPI
-    long buf[MAXDLBUF]; 
+    long buf[MAXDLBUF];
 #endif
 
     while((opt = getopt(argc, argv, "I:V")) != -1) {
@@ -181,16 +183,16 @@ main(int argc, char *argv[])
 
     /* Open the interface */
 #ifdef USE_DLPI
-	sock = openInterface(IfName, Eth_PPPOE_Discovery, NULL); 
-        dlpromisconreq(sock, DL_PROMISC_PHYS);
-        dlokack(sock, (char *)buf);
+	sock = openInterface(IfName, Eth_PPPOE_Discovery, NULL);
+	dlpromisconreq(sock, DL_PROMISC_PHYS);
+	dlokack(sock, (char *)buf);
 	dlpromisconreq(sock, DL_PROMISC_SAP);
 	dlokack(sock, (char *)buf);
 #else
 
     sock = openInterface(IfName, ETH_P_ALL,  NULL);
 
-#endif 
+#endif
 
     /* We assume interface is in promiscuous mode -- use ifconfig to
        ensure this */
@@ -209,7 +211,7 @@ main(int argc, char *argv[])
 	fprintf(stderr, "\nExcellent!  Sniffed a likely-looking PADR.\n");
 	break;
     }
-    
+
     while (!SeenSess) {
 	if (receivePacket(sock, &pkt, &size) < 0) continue;
 	if (ntohs(pkt.length) + HDR_SIZE > size) continue;

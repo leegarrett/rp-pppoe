@@ -1,5 +1,8 @@
 #ifndef MD5_H
 #define MD5_H
+/*
+ * LIC: GPL
+ */
 
 #ifdef __alpha
 typedef unsigned int uint32;

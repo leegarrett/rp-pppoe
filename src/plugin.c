@@ -19,10 +19,13 @@
 * modify it under the terms of the GNU General Public License
 * as published by the Free Software Foundation; either version
 * 2 of the License, or (at your option) any later version.
+*
+* LIC: GPL
+*
 ***********************************************************************/
 
 static char const RCSID[] =
-"$Id: plugin.c,v 1.18 2001/09/14 18:49:31 dfs Exp $";
+"$Id: plugin.c,v 1.26 2002/04/24 18:32:59 dfs Exp $";
 
 #define _GNU_SOURCE 1
 #include "pppoe.h"
@@ -54,28 +57,33 @@ static char const RCSID[] =
 
 #define _PATH_ETHOPT         _ROOT_PATH "/etc/ppp/options."
 
+char pppd_version[] = VERSION;
+
 /* From sys-linux.c in pppd -- MUST FIX THIS! */
 extern int new_style_driver;
 
-static char *service = NULL;
+char *pppd_pppoe_service = NULL;
 static char *acName = NULL;
 static char *existingSession = NULL;
+static int printACNames = 0;
 
-static int PPPoEDevnameHook(const char *name);
+static int PPPoEDevnameHook(char *cmd, char **argv, int doit);
 static option_t Options[] = {
     { "device name", o_wild, (void *) &PPPoEDevnameHook,
       "PPPoE device name",
       OPT_DEVNAM | OPT_PRIVFIX | OPT_NOARG  | OPT_A2STRVAL | OPT_STATIC,
       devnam},
-    { "rp_pppoe_service", o_string, &service,
+    { "rp_pppoe_service", o_string, &pppd_pppoe_service,
       "Desired PPPoE service name" },
     { "rp_pppoe_ac",      o_string, &acName,
       "Desired PPPoE access concentrator name" },
     { "rp_pppoe_sess",    o_string, &existingSession,
       "Attach to existing session (sessid:macaddr)" },
+    { "rp_pppoe_verbose", o_int, &printACNames,
+      "Be verbose about discovered access concentrators"},
     { NULL }
 };
-int (*OldDevnameHook)(const char *name) = NULL;
+int (*OldDevnameHook)(char *cmd, char **argv, int doit) = NULL;
 static PPPoEConnection *conn = NULL;
 
 /**********************************************************************
@@ -98,13 +106,14 @@ PPPOEInitDevice(void)
     if (acName) {
 	SET_STRING(conn->acName, acName);
     }
-    if (service) {
-	SET_STRING(conn->serviceName, acName);
+    if (pppd_pppoe_service) {
+	SET_STRING(conn->serviceName, pppd_pppoe_service);
     }
     SET_STRING(conn->ifName, devnam);
     conn->discoverySocket = -1;
     conn->sessionSocket = -1;
     conn->useHostUniq = 1;
+    conn->printACNames = printACNames;
     return 1;
 }
 
@@ -142,10 +151,8 @@ PPPOEConnectDevice(void)
 	}
     }
 
-#ifdef HAVE_LICENSE
     /* Set PPPoE session-number for further consumption */
-    pppd_pppoe_session = ntohs(conn->session);
-#endif
+    ppp_session_number = ntohs(conn->session);
 
     /* Make the session socket */
     conn->sessionSocket = socket(AF_PPPOX, SOCK_STREAM, PX_PROTO_OE);
@@ -157,7 +164,7 @@ PPPOEConnectDevice(void)
     sp.sa_addr.pppoe.sid = conn->session;
     memcpy(sp.sa_addr.pppoe.dev, conn->ifName, IFNAMSIZ);
     memcpy(sp.sa_addr.pppoe.remote, conn->peerEth, ETH_ALEN);
-#ifdef HAVE_LICENSE
+
     /* Set remote_number for ServPoET */
     sprintf(remote_number, "%02X:%02X:%02X:%02X:%02X:%02X",
 	    (unsigned) conn->peerEth[0],
@@ -166,7 +173,6 @@ PPPOEConnectDevice(void)
 	    (unsigned) conn->peerEth[3],
 	    (unsigned) conn->peerEth[4],
 	    (unsigned) conn->peerEth[5]);
-#endif
 
     if (connect(conn->sessionSocket, (struct sockaddr *) &sp,
 		sizeof(struct sockaddr_pppox)) < 0) {
@@ -185,7 +191,7 @@ PPPOESendConfig(int mtu,
 {
     int sock;
     struct ifreq ifr;
-    
+
     if (mtu > MAX_PPPOE_MTU) {
 	warn("Couldn't increase MTU to %d", mtu);
 	mtu = MAX_PPPOE_MTU;
@@ -256,7 +262,9 @@ struct channel pppoe_channel;
 /**********************************************************************
  * %FUNCTION: PPPoEDevnameHook
  * %ARGUMENTS:
- * name -- name of device
+ * cmd -- the command (actually, the device name
+ * argv -- argument vector
+ * doit -- if non-zero, set device name.  Otherwise, just check if possible
  * %RETURNS:
  * 1 if we will handle this device; 0 otherwise.
  * %DESCRIPTION:
@@ -264,11 +272,18 @@ struct channel pppoe_channel;
  * sets up devnam (string representation of device).
  ***********************************************************************/
 static int
-PPPoEDevnameHook(const char *name)
+PPPoEDevnameHook(char *cmd, char **argv, int doit)
 {
     int r = 1;
     int fd;
     struct ifreq ifr;
+
+    /* Only do it if name is "ethXXX" */
+    /* Thanks to Russ Couturier for this fix */
+    if (strlen(cmd) < 4 || strncmp(cmd, "eth", 3)) {
+	if (OldDevnameHook) return OldDevnameHook(cmd, argv, doit);
+	return 0;
+    }
 
     /* Open a socket */
     if ((fd = socket(PF_PACKET, SOCK_RAW, 0)) < 0) {
@@ -277,7 +292,7 @@ PPPoEDevnameHook(const char *name)
 
     /* Try getting interface index */
     if (r) {
-	strncpy(ifr.ifr_name, name, sizeof(ifr.ifr_name));
+	strncpy(ifr.ifr_name, cmd, sizeof(ifr.ifr_name));
 	if (ioctl(fd, SIOCGIFINDEX, &ifr) < 0) {
 	    r = 0;
 	} else {
@@ -285,7 +300,7 @@ PPPoEDevnameHook(const char *name)
 		r = 0;
 	    } else {
 		if (ifr.ifr_hwaddr.sa_family != ARPHRD_ETHER) {
-		    error("Interface %s not Ethernet", name);
+		    error("Interface %s not Ethernet", cmd);
 		    r=0;
 		}
 	    }
@@ -295,36 +310,36 @@ PPPoEDevnameHook(const char *name)
     /* Close socket */
     close(fd);
     if (r) {
-	strncpy(devnam, name, sizeof(devnam));
+	strncpy(devnam, cmd, sizeof(devnam));
 	if (the_channel != &pppoe_channel) {
 
 	    the_channel = &pppoe_channel;
 	    modem = 0;
-	    
+
 	    lcp_allowoptions[0].neg_accompression = 0;
 	    lcp_wantoptions[0].neg_accompression = 0;
-	    
+
 	    lcp_allowoptions[0].neg_asyncmap = 0;
 	    lcp_wantoptions[0].neg_asyncmap = 0;
-	    
+
 	    lcp_allowoptions[0].neg_pcompression = 0;
 	    lcp_wantoptions[0].neg_pcompression = 0;
-	    
+
 	    ccp_allowoptions[0].deflate = 0 ;
 	    ccp_wantoptions[0].deflate = 0 ;
-	    
+
 	    ipcp_allowoptions[0].neg_vj=0;
 	    ipcp_wantoptions[0].neg_vj=0;
-	    
+
 	    ccp_allowoptions[0].bsd_compress = 0;
 	    ccp_wantoptions[0].bsd_compress = 0;
-	    
+
 	    PPPOEInitDevice();
 	}
 	return 1;
     }
 
-    if (OldDevnameHook) r = OldDevnameHook(name);
+    if (OldDevnameHook) r = OldDevnameHook(cmd, argv, doit);
     return r;
 }
 
@@ -383,12 +398,11 @@ fatalSys(char const *str)
 void
 rp_fatal(char const *str)
 {
-    char buf[1024];
     printErr(str);
-    sprintf(buf, "RP-PPPoE: %.256s", str);
-    sendPADT(conn, buf);
+    sendPADTf(conn, "RP-PPPoE: %.256s", str);
     exit(1);
 }
+
 /**********************************************************************
 *%FUNCTION: sysErr
 *%ARGUMENTS:

@@ -11,10 +11,12 @@
 * This program may be distributed according to the terms of the GNU
 * General Public License, version 2 or (at your option) any later version.
 *
+* LIC: GPL
+*
 ***********************************************************************/
 
 static char const RCSID[] =
-"$Id: ppp.c,v 1.4 2001/01/29 17:37:20 dfs Exp $";
+"$Id: ppp.c,v 1.6 2002/04/09 17:28:39 dfs Exp $";
 
 #include "pppoe.h"
 
@@ -128,7 +130,7 @@ syncReadFromPPP(PPPoEConnection *conn, PPPoEPacket *packet)
     if (r < 2) {
 	rp_fatal("too few characters read from PPP (syncReadFromPPP)");
     }
-    
+
     sendSessionPacket(conn, packet, r-2);
 }
 
@@ -189,7 +191,7 @@ asyncReadFromPPP(PPPoEConnection *conn, PPPoEPacket *packet)
 		}
 	    }
 	}
-	
+
 	/* Still waiting... */
 	if (PPPState == STATE_WAITFOR_FRAME_ADDR) return;
 
@@ -246,13 +248,12 @@ asyncReadFromPPP(PPPoEConnection *conn, PPPoEPacket *packet)
 * Updates the PPP FCS.
 ***********************************************************************/
 UINT16_t
-pppFCS16(UINT16_t fcs, 
-	 unsigned char * cp, 
+pppFCS16(UINT16_t fcs,
+	 unsigned char * cp,
 	 int len)
 {
     while (len--)
 	fcs = (fcs >> 8) ^ fcstab[(fcs ^ *cp++) & 0xff];
-    
+
     return (fcs);
 }
-

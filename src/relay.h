@@ -9,7 +9,9 @@
 * This program may be distributed according to the terms of the GNU
 * General Public License, version 2 or (at your option) any later version.
 *
-* $Id: relay.h,v 1.10 2001/01/26 16:03:45 dfs Exp $
+* LIC: GPL
+*
+* $Id: relay.h,v 1.11 2002/04/09 17:28:39 dfs Exp $
 *
 ***********************************************************************/
 

@@ -5,6 +5,8 @@
 # chkconfig: 2345 99 01
 # description: Connects to ADSL provider
 #
+# LIC: GPL
+#
 # Copyright (C) 2000 Roaring Penguin Software Inc.  This software may
 # be distributed under the terms of the GNU General Public License, version
 # 2 or any later version.

@@ -1,6 +1,6 @@
 Summary: PPP Over Ethernet (xDSL support)
 Name: rp-pppoe
-Version: 3.3
+Version: 3.5
 %if %(%{expand:test %{_vendor} != mandrake ; echo $?})
 Release: 1mdk
 %else
@@ -8,13 +8,14 @@ Release: 1
 %endif
 Copyright: GPL
 Group: System Environment/Daemons
-Source: http://www.roaringpenguin.com/pppoe/rp-pppoe-3.3.tar.gz
+Source: http://www.roaringpenguin.com/pppoe/rp-pppoe-3.5.tar.gz
 Url: http://www.roaringpenguin.com/pppoe/
 Packager: David F. Skoll <dfs@roaringpenguin.com>
 BuildRoot: /tmp/pppoe-build
 Vendor: Roaring Penguin Software Inc.
 Requires: ppp >= 2.3.7
 
+# LIC: GPL
 %description
 PPPoE (Point-to-Point Protocol over Ethernet) is a protocol used by
 many ADSL Internet Service Providers. Roaring Penguin has a free
@@ -47,10 +48,10 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root)
 %doc doc/CHANGES doc/HOW-TO-CONNECT doc/LICENSE doc/KERNEL-MODE-PPPOE README SERVPOET
-%config /etc/ppp/pppoe.conf
-%config /etc/ppp/pppoe-server-options
-%config /etc/ppp/firewall-masq
-%config /etc/ppp/firewall-standalone
+%config(noreplace) /etc/ppp/pppoe.conf
+%config(noreplace) /etc/ppp/pppoe-server-options
+%config(noreplace) /etc/ppp/firewall-masq
+%config(noreplace) /etc/ppp/firewall-standalone
 /etc/ppp/plugins/*
 /usr/sbin/pppoe
 /usr/sbin/pppoe-server
@@ -131,14 +132,16 @@ fi
 /usr/bin/tkpppoe
 %{_mandir}/man1/tkpppoe.1*
 %{_mandir}/man1/pppoe-wrapper.1*
-/usr/share/rp-pppoe-gui/tkpppoe.html
-/usr/share/rp-pppoe-gui/mainwin-busy.png
-/usr/share/rp-pppoe-gui/mainwin-nonroot.png
-/usr/share/rp-pppoe-gui/mainwin.png
-/usr/share/rp-pppoe-gui/props-advanced.png
-/usr/share/rp-pppoe-gui/props-basic.png
-/usr/share/rp-pppoe-gui/props-nic.png
-/usr/share/rp-pppoe-gui/props-options.png
+/usr/share/tkpppoe/tkpppoe.html
+/usr/share/tkpppoe/mainwin-busy.png
+/usr/share/tkpppoe/mainwin-nonroot.png
+/usr/share/tkpppoe/mainwin.png
+/usr/share/tkpppoe/props-advanced.png
+/usr/share/tkpppoe/props-basic.png
+/usr/share/tkpppoe/props-nic.png
+/usr/share/tkpppoe/props-options.png
+/usr/share/tkpppoe/en.msg
+/usr/share/tkpppoe/ja.msg
 
 %changelog
 * Thu Jul 21 2001 Shigechika AIKAWA <shige@cin.nihon-u.ac.jp>

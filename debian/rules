@@ -3,9 +3,6 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-# This is the debhelper compatibility version to use.
-export DH_COMPAT=1
-
 build: build-stamp
 build-stamp:
 	dh_testdir
@@ -18,7 +15,7 @@ clean:
 	dh_testdir
 	dh_testroot
 	rm -f build-stamp
-	-rm -f pppoe.prj
+	-rm -f pppoe.prj pppoe.log .pppoe.prcs_aux
 	-$(MAKE) -C src distclean
 	-$(MAKE) -C gui distclean
 	rm -f src/pppoe-relay
@@ -35,16 +32,18 @@ binary-arch: build
 	dh_testroot
 	dh_clean -k
 	dh_installdirs usr/sbin usr/share
-	$(MAKE) -C src install RPM_INSTALL_ROOT="`pwd`/debian/tmp"
-# Now clean out unwanted things, and move others to their places
-	rm -rf debian/tmp/etc/ppp debian/tmp/usr/doc
-	rm -rf debian/tmp/usr/man/man5  # pppoe.conf manpage
-	rm -f debian/tmp/usr/sbin/adsl-* debian/tmp/usr/man/man8/adsl-*
+	$(MAKE) -C src install RPM_INSTALL_ROOT="`pwd`/debian/pppoe"
+#	Now clean out unwanted things, and move others to their places
+	rm -rf debian/pppoe/etc/ppp debian/pppoe/usr/doc
+	rm -rf debian/pppoe/usr/man/man5  # pppoe.conf manpage
+	rm -f debian/pppoe/usr/sbin/adsl-* debian/pppoe/usr/man/man8/adsl-*
 	dh_installdirs etc/ppp/peers
-	mv debian/tmp/usr/man debian/tmp/usr/share/man
-	install -m 0640 -o root -g dip debian/dsl-provider debian/tmp/etc/ppp/peers/dsl-provider
-	install -m 750 -o root -g dip debian/ppp_on_boot.dsl debian/tmp/etc/ppp
-	dh_installdocs doc/KERNEL-MODE-PPPOE
+	mv debian/pppoe/usr/man debian/pppoe/usr/share/man
+	install -m 0640 -o root -g dip debian/dsl-provider \
+		debian/pppoe/etc/ppp/peers/dsl-provider
+	install -m 750 -o root -g dip debian/ppp_on_boot.dsl \
+		debian/pppoe/etc/ppp/
+	dh_installdocs
 	dh_installexamples
 #	dh_installmanpages
 	dh_installchangelogs doc/CHANGES
@@ -52,7 +51,9 @@ binary-arch: build
 	dh_strip
 	dh_compress
 #	dh_fixperms
-#	dh_suidregister
+	chgrp dip debian/pppoe/usr/sbin/pppoe
+	chmod u+s debian/pppoe/usr/sbin/pppoe
+	chmod o-x debian/pppoe/usr/sbin/pppoe
 	dh_installdeb
 	dh_shlibdeps
 	dh_gencontrol

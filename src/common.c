@@ -11,12 +11,17 @@
 * This program may be distributed according to the terms of the GNU
 * General Public License, version 2 or (at your option) any later version.
 *
+* LIC: GPL
+*
 ***********************************************************************/
 
 static char const RCSID[] =
-"$Id: common.c,v 1.11 2001/03/22 15:58:43 dfs Exp $";
+"$Id: common.c,v 1.15 2002/04/24 18:32:59 dfs Exp $";
+/* For vsnprintf prototype */
+#define _ISOC99_SOURCE 1
 
 #include "pppoe.h"
+
 
 #ifdef HAVE_SYSLOG_H
 #include <syslog.h>
@@ -25,6 +30,7 @@ static char const RCSID[] =
 #include <string.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <stdarg.h>
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -93,7 +99,7 @@ parsePacket(PPPoEPacket *packet, ParseFunc *func, void *extra)
 * tag -- will be filled in with tag contents
 *%RETURNS:
 * A pointer to the tag if one of the specified type is found; NULL
-* otherwise. 
+* otherwise.
 *%DESCRIPTION:
 * Looks for a specific tag type.
 ***********************************************************************/
@@ -248,21 +254,38 @@ clampMSS(PPPoEPacket *packet, char const *dir, int clampMss)
     unsigned char *mssopt = NULL;
     UINT16_t csum;
 
-    int len;
+    int len, minlen;
 
-    /* Is it IPv4? */
-    if (packet->payload[0] != 0x00 ||
-	packet->payload[1] != 0x21) {
-	/* Nope, ignore it */
-	return;
+    /* check PPP protocol type */
+    if (packet->payload[0] & 0x01) {
+        /* 8 bit protocol type */
+
+        /* Is it IPv4? */
+        if (packet->payload[0] != 0x21) {
+            /* Nope, ignore it */
+            return;
+        }
+
+        ipHdr = packet->payload + 1;
+	minlen = 41;
+    } else {
+        /* 16 bit protocol type */
+
+        /* Is it IPv4? */
+        if (packet->payload[0] != 0x00 ||
+            packet->payload[1] != 0x21) {
+            /* Nope, ignore it */
+            return;
+        }
+
+        ipHdr = packet->payload + 2;
+	minlen = 42;
     }
-
-    ipHdr = packet->payload + 2;
 
     /* Is it too short? */
     len = (int) ntohs(packet->length);
-    if (len < 42) {
-	/* 20 byte IP header; 20 byte TCP header; 2 byte PPP protocol */
+    if (len < minlen) {
+	/* 20 byte IP header; 20 byte TCP header; at least 1 or 2 byte PPP protocol */
 	return;
     }
 
@@ -423,7 +446,7 @@ sendPADT(PPPoEConnection *conn, char const *msg)
 	cursor += elen + TAG_HDR_SIZE;
 	plen += elen + TAG_HDR_SIZE;
     }
-	    
+
     /* Copy cookie and relay-ID if needed */
     if (conn->cookie.type) {
 	CHECK_ROOM(cursor, packet.payload,
@@ -449,6 +472,31 @@ sendPADT(PPPoEConnection *conn, char const *msg)
 	fflush(conn->debugFile);
     }
     syslog(LOG_INFO,"Sent PADT");
+}
+
+/***********************************************************************
+*%FUNCTION: sendPADTf
+*%ARGUMENTS:
+* conn -- PPPoE connection
+* msg -- printf-style format string
+* args -- arguments for msg
+*%RETURNS:
+* Nothing
+*%DESCRIPTION:
+* Sends a PADT packet with a formatted message
+***********************************************************************/
+void
+sendPADTf(PPPoEConnection *conn, char const *fmt, ...)
+{
+    char msg[512];
+    va_list ap;
+
+    va_start(ap, fmt);
+    vsnprintf(msg, sizeof(msg), fmt, ap);
+    va_end(ap);
+    msg[511] = 0;
+
+    sendPADT(conn, msg);
 }
 
 /**********************************************************************
@@ -482,4 +530,3 @@ parseLogErrs(UINT16_t type, UINT16_t len, unsigned char *data,
 	break;
     }
 }
-

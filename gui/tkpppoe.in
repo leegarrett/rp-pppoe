@@ -1,5 +1,6 @@
 #!/bin/sh
 # -*-Mode: TCL;-*-
+# LIC: GPL
 
 #--------------------------------------------------------------
 #   tkpppoe
@@ -16,12 +17,25 @@
 #
 #--------------------------------------------------------------
 
-# $Id: tkpppoe.in,v 1.44 2001/09/14 19:07:41 dfs Exp $
+# $Id: tkpppoe.in,v 1.47 2002/04/09 17:28:38 dfs Exp $
 
 # the next line restarts using wish \
 umask 022; \
 exec wish "$0" "$@" || clear; echo "*****"; echo "Cannot find 'wish' -- you need Tcl/Tk installed to run this program"; exit 1
 
+# Try requiring msgcat (Tcl 8.1 and later)
+
+set problem [catch {package require msgcat} err]
+if {!$problem} {
+    set problem [catch {::msgcat::mcload [file join "@datadir_evaluated@" tkpppoe]} err]
+}
+if {$problem} {
+    puts "$problem - $err"
+    # Oops... leave as English
+    proc m { str } { return $str }
+} else {
+    proc m { str } { ::msgcat::mc $str }
+}
 # Set app name
 tk appname TkPPPoE
 
@@ -1218,7 +1232,7 @@ proc LoadConnectionInfo {} {
 	close $fp
     } err]
     if {$problem} {
-	tk_dialog .err Error "Error loading configuration file: $err" error 0 OK
+	tk_dialog .err Error "[m {Error loading configuration file:}] $err" error 0 OK
     }
     # Try loading and merging passwords if the password file is readable
     set passwords {}
@@ -1271,7 +1285,7 @@ proc GetConnection { name } {
     }
     return ""
 }
-    
+
 
 #***********************************************************************
 # %PROCEDURE: DeleteConnection
@@ -1344,7 +1358,7 @@ proc DeletePPPoEConnection {} {
     if {"$conn" == ""} {
 	return
     }
-    set ans [tk_dialog .confirm "Confirm Deletion - RP-PPPoE" "Are you sure you wish to delete the connection `$conn'?" warning 0 No Yes]
+    set ans [tk_dialog .confirm "[m {Confirm Deletion - RP-PPPoE}]" "[m {Are you sure you wish to delete the connection}] `$conn'?" warning 0 No Yes]
     if {$ans} {
 	DeleteConnection $conn
     }
@@ -1378,17 +1392,17 @@ proc CreateMainDialog {} {
     .c create rectangle 10 10 30 18 -outline "#808080" -fill "#A0A0A0" -tags recvrect
 
     frame .buttons
-    button .start -text "Start" -command "StartPPPoEConnection"
-    button .stop -text "Stop" -command "StopPPPoEConnection"
-    button .exit -text "Exit" -command "exit"
+    button .start -text "[m {Start}]" -command "StartPPPoEConnection"
+    button .stop -text "[m {Stop}]" -command "StopPPPoEConnection"
+    button .exit -text "[m {Exit}]" -command "exit"
     canvas .graph -width 1 -height 1
     if {[file writable $ConnectionInfoFile]} {
 	set Admin 1
 	pack .f1 -side top -expand 1 -fill both
 	pack .buttons -side top -expand 0 -fill x
-	button .delete -text "Delete" -command "DeletePPPoEConnection"
-	button .new -text "New Connection..." -command "NewPPPoEConnection"
-	button .props -text "Properties..." -command "EditConnectionProps"
+	button .delete -text "[m {Delete}]" -command "DeletePPPoEConnection"
+	button .new -text "[m {New Connection...}]" -command "NewPPPoEConnection"
+	button .props -text "[m {Properties...}]" -command "EditConnectionProps"
 	pack .graph -in .f1 -side left -expand 1 -fill both
 	pack .start .stop .delete .props .new .exit -in .buttons -side left -expand 0 -fill none
     } else {
@@ -1408,7 +1422,7 @@ proc CreateMainDialog {} {
 	    update idletasks
 	    NewPPPoEConnection
 	} else {
-	    tk_dialog .note Note "Note: There are no connections defined.  You must run this program as root to define connections" warning 0 OK
+	    tk_dialog .note [m {Note}] "[m {Note: There are no connections defined.  You must run this program as root to define connections}]" warning 0 OK
 	}
     } else {
 	set con [lindex $ConnectionInfo 0]
@@ -1485,7 +1499,7 @@ proc FillConnectionGui { w name } {
 	ListToSetupGui $w $found
     }
 }
-    
+
 #***********************************************************************
 # %PROCEDURE: BuildConnectionMenu
 # %ARGUMENTS:
@@ -1608,7 +1622,7 @@ proc StartPPPoEConnection {} {
     UnlockGui
 
     if {$StartState(status) == "failed"} {
-	tk_dialog .err Error "Error starting connection: $StartState(msg)" error 0 OK
+	tk_dialog .err Error "[m {Error starting connection:}] $StartState(msg)" error 0 OK
     }
     SetButtonStates
     UpdateConnectionState 0
@@ -1634,10 +1648,10 @@ proc AbortConnection { fp } {
     global StartState
     catch { StopPPPoEConnection }
     catch { close $fp }
-    set StartState(msg) "Connection aborted by user"
-    set StartState(status) "failed"
+    set StartState(msg) "[m {Connection aborted by user}]"
+    set StartState(status) "[m {failed}]"
 }
-    
+
 #***********************************************************************
 # %PROCEDURE: StartFPReadable
 # %ARGUMENTS:
@@ -1653,10 +1667,10 @@ proc StartFPReadable { fp } {
     if {$char == ""} {
 	set uhoh [catch {close $fp} err]
 	if {$uhoh} {
-	    set StartState(status) "failed"
+	    set StartState(status) "[m {failed}]"
 	    set StartState(msg) $err
 	} else {
-	    set StartState(status) "succeeded"
+	    set StartState(status) "[m {succeeded}]"
 	}
 	return
     }
@@ -1695,7 +1709,7 @@ proc StopPPPoEConnection {} {
     if {$uhoh} {
 	# Ignore a common error
 	if {![string match "*appears to have died*" $err]} {
-	    tk_dialog .err Error "Error stopping connection: $err" error 0 OK
+	    tk_dialog .err Error "[m {Error stopping connection:}] $err" error 0 OK
 	}
     }
     SetButtonStates
@@ -1721,44 +1735,44 @@ proc NewPPPoEConnection {{name ""}} {
 
     toplevel $w
     if {"$name" == ""} {
-	wm title $w "New Connection - RP-PPPoE"
-	wm iconname $w "New Connection"
+	wm title $w "[m {New Connection}] - RP-PPPoE"
+	wm iconname $w "[m {New Connection}]"
     } else {
-	wm title $w "Edit Connection - RP-PPPoE"
-	wm iconname $w "Edit Connection"
+	wm title $w "[m {Edit Connection}] - RP-PPPoE"
+	wm iconname $w "[m {Edit Connection}]"
     }
     wm withdraw $w
 
     tabnotebook_create $w.tn
-    set basic [tabnotebook_page $w.tn "Basic"]
-    set interface [tabnotebook_page $w.tn "NIC and DNS"]
-    set opts [tabnotebook_page $w.tn "Options"]
-    set advanced [tabnotebook_page $w.tn "Advanced"]
+    set basic [tabnotebook_page $w.tn "[m {Basic}]"]
+    set interface [tabnotebook_page $w.tn "[m {NIC and DNS}]"]
+    set opts [tabnotebook_page $w.tn "[m {Options}]"]
+    set advanced [tabnotebook_page $w.tn "[m {Advanced}]"]
 
     # ----------- BASIC PAGE -------------
-    label $w.lconName -text "Connection Name: " -anchor e
+    label $w.lconName -text "[m {Connection Name:}] " -anchor e
     if {"$name" != ""} {
 	label $w.conName -text $name -anchor w
     } else {
 	entry $w.conName -width 15
-	RegisterHelpWindow $w.lconName "Enter a name for this connection.  It can contain letters, numbers, undescores and the minus-sign." $w.help
-	RegisterHelpWindow $w.conName "Enter a name for this connection.  It can contain letters, numbers, undescores and the minus-sign." $w.help
+	RegisterHelpWindow $w.lconName "[m {Enter a name for this connection.  It can contain letters, numbers, undescores and the minus-sign.}]" $w.help
+	RegisterHelpWindow $w.conName "[m {Enter a name for this connection.  It can contain letters, numbers, undescores and the minus-sign.}]" $w.help
     }
 
-    label $w.luser -text "User Name: " -anchor e
+    label $w.luser -text "[m {User Name:}] " -anchor e
     entry $w.user -width 15
-    RegisterHelpWindow $w.luser "Enter your user name.  Do not add a domain-name after the user name." $w.help
-    RegisterHelpWindow $w.user "Enter your user name.  Do not add a domain-name after the user name." $w.help
+    RegisterHelpWindow $w.luser "[m {Enter your user name.  Do not add a domain-name after the user name.}]" $w.help
+    RegisterHelpWindow $w.user "[m {Enter your user name.  Do not add a domain-name after the user name.}]" $w.help
 
-    label $w.lnet -text "Network: " -anchor e
+    label $w.lnet -text "[m {Network:}] " -anchor e
     entry $w.network -width 15
-    RegisterHelpWindow $w.lnet "Some ISP's require you to enter their domain-name here (e.g. \"sympatico.ca\")." $w.help
-    RegisterHelpWindow $w.network "Some ISP's require you to enter their domain-name here (e.g. \"sympatico.ca\")." $w.help
+    RegisterHelpWindow $w.lnet "[m {Some ISP's require you to enter their domain-name here (e.g. "sympatico.ca").}]" $w.help
+    RegisterHelpWindow $w.network "[m {Some ISP's require you to enter their domain-name here (e.g. "sympatico.ca").}]" $w.help
 
-    label $w.lpass -text "Password: " -anchor e
+    label $w.lpass -text "[m {Password:}] " -anchor e
     entry $w.pass -width 15 -show "*"
-    RegisterHelpWindow $w.lpass "Enter your password." $w.help
-    RegisterHelpWindow $w.pass "Enter your password." $w.help
+    RegisterHelpWindow $w.lpass "[m {Enter your password.}]" $w.help
+    RegisterHelpWindow $w.pass "[m {Enter your password.}]" $w.help
 
     grid $w.lconName $w.conName -in $basic -sticky nsew
     grid $w.luser $w.user -in $basic -sticky nsew
@@ -1770,14 +1784,14 @@ proc NewPPPoEConnection {{name ""}} {
     set ifs {}
     catch {set ifs [GetEthernetInterfaces]}
 
-    label $w.lifname -text "Ethernet Interface: " -anchor e
+    label $w.lifname -text "[m {Ethernet Interface:}] " -anchor e
     entry $w.ifname -width 8
-    RegisterHelpWindow $w.lifname "Enter Ethernet interface to which DSL modem is attached." $w.help
-    RegisterHelpWindow $w.ifname "Enter Ethernet interface to which DSL modem is attached." $w.help
+    RegisterHelpWindow $w.lifname "[m {Enter Ethernet interface to which DSL modem is attached.}]" $w.help
+    RegisterHelpWindow $w.ifname "[m {Enter Ethernet interface to which DSL modem is attached.}]" $w.help
 
     if {[llength $ifs] > 0} {
 	menubutton $w.ifmb -relief raised -text "..." -menu $w.ifmb.menu
-	RegisterHelpWindow $w.ifmb "Browse detected Ethernet interface names." $w.help
+	RegisterHelpWindow $w.ifmb "[m {Browse detected Ethernet interface names.}]" $w.help
 	menu $w.ifmb.menu -tearoff 0
 	foreach if $ifs {
 	    $w.ifmb.menu add command -label $if -command "$w.ifname delete 0 end; $w.ifname insert end [list $if]"
@@ -1787,25 +1801,25 @@ proc NewPPPoEConnection {{name ""}} {
 	grid $w.lifname $w.ifname - -in $interface -sticky nsew
     }
 
-    label $w.ldns -text "DNS Setup: " -anchor e
-    menubutton $w.dns -text "From Server" -menu $w.dns.menu -relief raised -indicatoron 1
+    label $w.ldns -text "[m {DNS Setup:}] " -anchor e
+    menubutton $w.dns -text "[m {From Server}]" -menu $w.dns.menu -relief raised -indicatoron 1
     menu $w.dns.menu -tearoff 0
-    foreach thing {"From Server" "Specify" "Do not Adjust"} {
+    foreach thing [list "[m {From Server}]" "[m {Specify}]" "[m {Do not Adjust}]"] {
 	$w.dns.menu add command -label $thing -command [list SetDNSOption $w $thing]
     }
-    RegisterHelpWindow $w.ldns "DNS server options:\n'From Server'   - Let PPPoE server specify DNS servers\n'Specify'       - Enter IP addresses of DNS servers yourself\n'Do not Adjust' - Leave your DNS setup alone." $w.help
-    RegisterHelpWindow $w.dns "DNS server options:\n'From Server'   - Let PPPoE server specify DNS servers\n'Specify'       - Enter IP addresses of DNS servers yourself\n'Do not Adjust' - Leave your DNS setup alone." $w.help
+    RegisterHelpWindow $w.ldns [m "DNS server options:\n'From Server'   - Let PPPoE server specify DNS servers\n'Specify'       - Enter IP addresses of DNS servers yourself\n'Do not Adjust' - Leave your DNS setup alone."] $w.help
+    RegisterHelpWindow $w.dns [m "DNS server options:\n'From Server'   - Let PPPoE server specify DNS servers\n'Specify'       - Enter IP addresses of DNS servers yourself\n'Do not Adjust' - Leave your DNS setup alone."] $w.help
 
-    label $w.ldns1 -text "Primary DNS: " -anchor e
+    label $w.ldns1 -text "[m {Primary DNS:}] " -anchor e
     entry $w.dns1 -width 16
-    RegisterHelpWindow $w.ldns1 "Enter the IP address of the primary DNS server." $w.help
-    RegisterHelpWindow $w.dns1 "Enter the IP address of the primary DNS server." $w.help
-    label $w.ldns2 -text "Secondary DNS: " -anchor e
+    RegisterHelpWindow $w.ldns1 "[m {Enter the IP address of the primary DNS server.}]" $w.help
+    RegisterHelpWindow $w.dns1 "[m {Enter the IP address of the primary DNS server.}]" $w.help
+    label $w.ldns2 -text "[m {Secondary DNS:}] " -anchor e
     entry $w.dns2 -width 16
-    RegisterHelpWindow $w.ldns2 "Enter the IP address of the secondary DNS server." $w.help
-    RegisterHelpWindow $w.dns2 "Enter the IP address of the secondary DNS server." $w.help
+    RegisterHelpWindow $w.ldns2 "[m {Enter the IP address of the secondary DNS server.}]" $w.help
+    RegisterHelpWindow $w.dns2 "[m {Enter the IP address of the secondary DNS server.}]" $w.help
 
-    SetDNSOption $w "From Server"
+    SetDNSOption $w "[m {From Server}]"
     grid $w.ldns $w.dns - -in $interface -sticky nsew
     grid $w.ldns1 $w.dns1 - -in $interface -sticky nsew
     grid $w.ldns2 $w.dns2 - -in $interface -sticky nsew
@@ -1817,49 +1831,49 @@ proc NewPPPoEConnection {{name ""}} {
 
     grid columnconfigure $interface 1 -weight 1
     # ----------- OPTS PAGE -------------
-    checkbutton $w.nonroot -text "Allow use by non-root users" -variable OPTS(nonroot) -anchor w
-    RegisterHelpWindow $w.nonroot "If enabled, ordinary users can start and stop this connection." $w.help
-    checkbutton $w.sync -text "Use synchronous PPP" -variable OPTS(sync) -anchor w
-    RegisterHelpWindow $w.sync "Use synchronous PPP (recommended -- easier on the CPU.)" $w.help
-    label $w.lfw -text "Firewalling: " -anchor e
+    checkbutton $w.nonroot -text "[m {Allow use by non-root users}]" -variable OPTS(nonroot) -anchor w
+    RegisterHelpWindow $w.nonroot "[m {If enabled, ordinary users can start and stop this connection.}]" $w.help
+    checkbutton $w.sync -text "[m {Use synchronous PPP}]" -variable OPTS(sync) -anchor w
+    RegisterHelpWindow $w.sync "[m {Use synchronous PPP (recommended -- easier on the CPU.)}]" $w.help
+    label $w.lfw -text "[m {Firewalling:}] " -anchor e
     if {[llength $ifs] == 1} {
-	set defaultFW "Stand-Alone"
+	set defaultFW "[m {Stand-Alone}]"
     } else {
-	set defaultFW "Masquerading"
+	set defaultFW "[m {Masquerading}]"
     }
     menubutton $w.fw -text $defaultFW -menu $w.fw.menu -indicatoron 1 -relief raised
     menu $w.fw.menu -tearoff 0
-    foreach type {Stand-Alone Masquerading None} {
+    foreach type [list [m "Stand-Alone"] [m "Masquerading"] [m "None"]] {
 	$w.fw.menu add command -label $type -command [list $w.fw configure -text $type]
     }
-    
-    RegisterHelpWindow $w.lfw "Firewalling options:\nStand-Alone  - A stand-alone machine.\nMasquerading - A gateway machine used for Internet sharing.\nNone         - Use if you already have your own firewall rules or want to run servers." $w.help
-    RegisterHelpWindow $w.fw "Firewalling options:\nStand-Alone  - A stand-alone machine.\nMasquerading - A gateway machine used for Internet sharing.\nNone         - Use if you already have your own firewall rules or want to run servers." $w.help
+
+    RegisterHelpWindow $w.lfw [m "Firewalling options:\nStand-Alone  - A stand-alone machine.\nMasquerading - A gateway machine used for Internet sharing.\nNone         - Use if you already have your own firewall rules or want to run servers."] $w.help
+    RegisterHelpWindow $w.fw [m "Firewalling options:\nStand-Alone  - A stand-alone machine.\nMasquerading - A gateway machine used for Internet sharing.\nNone         - Use if you already have your own firewall rules or want to run servers."] $w.help
     grid $w.nonroot - -in $opts -sticky nsew
     grid $w.sync - -in $opts -sticky nsew
     grid $w.lfw $w.fw -in $opts -sticky nsw
     grid columnconfigure $opts 1 -weight 1
 
     # ----------- ADVANCED PAGE -------------
-    label $w.lsn -text "Service-Name: " -anchor e
+    label $w.lsn -text "[m {Service-Name:}] " -anchor e
     entry $w.servicename -width 24
 
-    label $w.lac -text "AC-Name: " -anchor e
+    label $w.lac -text "[m {AC-Name:}] " -anchor e
     entry $w.acname -width 24
 
-    RegisterHelpWindow $w.lac "Enter access concentrator name if required.  Most ISPs do not require this; try leaving it blank." $w.help
-    RegisterHelpWindow $w.acname "Enter access concentrator name if required.  Most ISPs do not require this; try leaving it blank." $w.help
+    RegisterHelpWindow $w.lac [m "Enter access concentrator name if required.  Most ISPs do not require this; try leaving it blank."] $w.help
+    RegisterHelpWindow $w.acname [m "Enter access concentrator name if required.  Most ISPs do not require this; try leaving it blank."] $w.help
     grid $w.lsn $w.servicename -in $advanced -sticky nsew
     grid $w.lac $w.acname -in $advanced -sticky nsew
-    RegisterHelpWindow $w.lsn "Enter service name if required.  Most ISPs do not require this; try leaving it blank." $w.help
-    RegisterHelpWindow $w.servicename "Enter service name if required.  Most ISPs do not require this; try leaving it blank." $w.help
+    RegisterHelpWindow $w.lsn [m "Enter service name if required.  Most ISPs do not require this; try leaving it blank."] $w.help
+    RegisterHelpWindow $w.servicename [m "Enter service name if required.  Most ISPs do not require this; try leaving it blank."] $w.help
 
     grid columnconfigure $advanced 1 -weight 1
 
     # ----------- BUTTONS -------------
     frame $w.buttons
-    button $w.ok -text "OK" -command [list NewPPPoEConnectionOK $name $w]
-    button $w.cancel -text "Cancel" -command [list destroy $w]
+    button $w.ok -text [m "OK"] -command [list NewPPPoEConnectionOK $name $w]
+    button $w.cancel -text [m "Cancel"] -command [list destroy $w]
     pack $w.ok $w.cancel -in $w.buttons -expand 0 -fill none -side left
 
     pack $w.tn -side top -expand 1 -fill both
@@ -1889,7 +1903,7 @@ proc NewPPPoEConnection {{name ""}} {
 #***********************************************************************
 proc SetDNSOption { w opt } {
     $w.dns configure -text $opt
-    if {"$opt" == "Specify"} {
+    if {"$opt" == "[m Specify]"} {
 	$w.dns1 configure -state normal -background white
 	$w.dns2 configure -state normal -background white
     } else {
@@ -1941,8 +1955,8 @@ proc tabnotebook_page {win name} {
     lappend tnInfo($win-tabs) $name
 
     if {$tnInfo($win-pending) == ""} {
-        set id [after idle [list tabnotebook_refresh $win]]
-        set tnInfo($win-pending) $id
+	set id [after idle [list tabnotebook_refresh $win]]
+	set tnInfo($win-pending) $id
     }
     return $page
 }
@@ -1959,32 +1973,32 @@ proc tabnotebook_refresh {win} {
     set maxh 0
 
     foreach name $tnInfo($win-tabs) {
-        set id [$win.tabs create text \
-            [expr $x+$margin+2] [expr -0.5*$margin] \
-            -anchor sw -text $name -font $font \
-            -tags [list $name]]
+	set id [$win.tabs create text \
+	    [expr $x+$margin+2] [expr -0.5*$margin] \
+	    -anchor sw -text $name -font $font \
+	    -tags [list $name]]
 
-        set bbox [$win.tabs bbox $id]
-        set wd [expr [lindex $bbox 2]-[lindex $bbox 0]]
-        set ht [expr [lindex $bbox 3]-[lindex $bbox 1]]
-        if {$ht > $maxh} {
-            set maxh $ht
-        }
+	set bbox [$win.tabs bbox $id]
+	set wd [expr [lindex $bbox 2]-[lindex $bbox 0]]
+	set ht [expr [lindex $bbox 3]-[lindex $bbox 1]]
+	if {$ht > $maxh} {
+	    set maxh $ht
+	}
 
-        $win.tabs create polygon 0 0  $x 0 \
-            [expr $x+$margin] [expr -$ht-$margin] \
-            [expr $x+$margin+$wd] [expr -$ht-$margin] \
-            [expr $x+$wd+2*$margin] 0 \
-            2000 0  2000 10  0 10 \
-            -outline black -fill $color \
-            -tags [list $name tab tab-$name]
+	$win.tabs create polygon 0 0  $x 0 \
+	    [expr $x+$margin] [expr -$ht-$margin] \
+	    [expr $x+$margin+$wd] [expr -$ht-$margin] \
+	    [expr $x+$wd+2*$margin] 0 \
+	    2000 0  2000 10  0 10 \
+	    -outline black -fill $color \
+	    -tags [list $name tab tab-$name]
 
-        $win.tabs raise $id
+	$win.tabs raise $id
 
-        $win.tabs bind $name <ButtonPress-1> \
-            [list tabnotebook_display $win $name]
+	$win.tabs bind $name <ButtonPress-1> \
+	    [list tabnotebook_display $win $name]
 
-        set x [expr $x+$wd+2*$margin]
+	set x [expr $x+$wd+2*$margin]
     }
     set height [expr $maxh+2*$margin]
     $win.tabs move all 0 $height
@@ -1992,9 +2006,9 @@ proc tabnotebook_refresh {win} {
     $win.tabs configure -width $x -height [expr $height+4]
 
     if {$tnInfo($win-current) != ""} {
-        tabnotebook_display $win $tnInfo($win-current)
+	tabnotebook_display $win $tnInfo($win-current)
     } else {
-        tabnotebook_display $win [lindex $tnInfo($win-tabs) 0]
+	tabnotebook_display $win [lindex $tnInfo($win-tabs) 0]
     }
     set tnInfo($win-pending) ""
 }
@@ -2050,7 +2064,7 @@ proc notebook_page {win name} {
     frame $page
 
     if {$nbInfo($win-count) == 1} {
-        after idle [list notebook_display $win $name]
+	after idle [list notebook_display $win $name]
     }
     return $page
 }
@@ -2060,18 +2074,18 @@ proc notebook_display {win name} {
 
     set page ""
     if {[info exists nbInfo($win-page-$name)]} {
-        set page $nbInfo($win-page-$name)
+	set page $nbInfo($win-page-$name)
     } elseif {[winfo exists $win.page$name]} {
-        set page $win.page$name
+	set page $win.page$name
     }
     if {$page == ""} {
-        error "bad notebook page \"$name\""
+	error "bad notebook page \"$name\""
     }
 
     notebook_fix_size $win
 
     if {$nbInfo($win-current) != ""} {
-        pack forget $nbInfo($win-current)
+	pack forget $nbInfo($win-current)
     }
     pack $page -expand yes -fill both
     set nbInfo($win-current) $page
@@ -2085,14 +2099,14 @@ proc notebook_fix_size {win} {
     set maxw 0
     set maxh 0
     foreach page $nbInfo($win-pages) {
-        set w [winfo reqwidth $page]
-        if {$w > $maxw} {
-            set maxw $w
-        }
-        set h [winfo reqheight $page]
-        if {$h > $maxh} {
-            set maxh $h
-        }
+	set w [winfo reqwidth $page]
+	if {$w > $maxw} {
+	    set maxw $w
+	}
+	set h [winfo reqheight $page]
+	if {$h > $maxh} {
+	    set maxh $h
+	}
     }
     set bd [$win cget -borderwidth]
     set maxw [expr $maxw+2*$bd]
@@ -2131,19 +2145,19 @@ proc SetupGuiToList { w } {
     # Validate
     set name [value $ans ConnectionName]
     if {![regexp -nocase {^[-a-z0-9_]+$} $name]} {
-	error "Connection name must be non-blank and contain only letters, digits, `_' and `-'"
+	error [m "Connection name must be non-blank and contain only letters, digits, `_' and `-'"]
     }
 
     # Check DNS
     set type [value $ans DNSType]
-    if {"$type" == "Specify"} {
+    if {"$type" == [m "Specify"]} {
 	set dns [value $ans DNS1]
 	if {![regexp {[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+} "$dns"]} {
-	    error "Primary DNS entry must consist of four dot-separated decimal numbers"
+	    error [m "Primary DNS entry must consist of four dot-separated decimal numbers"]
 	}
 	set dns [value $ans DNS2]
 	if {"$dns" != "" && ![regexp {[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+} "$dns"]} {
-	    error "Secondary DNS entry must consist of four dot-separated decimal numbers"
+	    error [m "Secondary DNS entry must consist of four dot-separated decimal numbers"]
 	}
     }
     return $ans
@@ -2235,7 +2249,7 @@ proc NewPPPoEConnectionOK { name w } {
 	set name [value $conn ConnectionName]
 	set tmp [GetConnection $name]
 	if {"$tmp" != ""} {
-	tk_dialog .err "Connection Exists" "The connection `$name' already exists.  Pick another name." error 0 OK
+	    tk_dialog .err [m "Connection Exists"] [m "The connection already exists.  Pick another name."] error 0 OK
 	return
 	}
     }
@@ -2453,15 +2467,15 @@ proc GenerateConfigFile { conn } {
 		puts $fp [ShellEscape "ETH=$val"]
 	    }
 	    DNSType {
-		if {"$val" == "From Server"} {
+		if {"$val" == "[m {From Server}]"} {
 		    puts $fp "DNSTYPE=SERVER"
-		    puts $fp "USEPEERDNS=yes"
-		} elseif {"$val" == "Specify"} {
+		    puts $fp "PEERDNS=yes"
+		} elseif {"$val" == "[m {Specify}]"} {
 		    puts $fp "DNSTYPE=SPECIFY"
-		    puts $fp "USEPEERDNS=no"
+		    puts $fp "PEERDNS=no"
 		} else {
 		    puts $fp "DNSTYPE=NOCHANGE"
-		    puts $fp "USEPEERDNS=no"
+		    puts $fp "PEERDNS=no"
 		}
 	    }
 	    DNS1 {
@@ -2482,9 +2496,9 @@ proc GenerateConfigFile { conn } {
 		puts $fp [ShellEscape "SERVICENAME=$val"]
 	    }
 	    FirewallType {
-		if {"$val" == "None"} {
+		if {"$val" == "[m {None}]"} {
 		    puts $fp "FIREWALL=NONE"
-		} elseif {"$val" == "Masquerading"} {
+		} elseif {"$val" == "[m {Masquerading}]"} {
 		    puts $fp "FIREWALL=MASQUERADE"
 		} else {
 		    puts $fp "FIREWALL=STANDALONE"
@@ -2828,14 +2842,15 @@ proc Pretty { n } {
 #  Opens help page
 #***********************************************************************
 proc Help {} {
-    if {![file readable /usr/share/rp-pppoe-gui/tkpppoe.html]} {
-	    tk_dialog .err Error "Help file '/usr/share/rp-pppoe-gui/tkpppoe.html' is not installed" error 0 OK	
+    set file [file join "@datadir_evaluated@" tkpppoe tkpppoe.html]
+    if {![file readable $file]} {
+	tk_dialog .err [m "Error"] [m "Help file is not installed"] error 0 OK
 	return
     }
-    catch { exec /bin/sh -c "netscape -remote 'openURL(/usr/share/rp-pppoe-gui/tkpppoe.html)' || netscape /usr/share/rp-pppoe-gui/tkpppoe.html" > /dev/null 2>/dev/null & }
+    catch { exec /bin/sh -c "netscape -remote 'openURL($file)' || netscape $file" > /dev/null 2>/dev/null & }
 }
 
-	
+
 
 #***********************************************************************
 # %PROCEDURE: doLogo
@@ -2858,7 +2873,7 @@ proc doLogo {} {
     drawLogo .c #FFFFCC
 
     # Funky effect
-    .c create text 4 4 -anchor nw -text "Welcome to RP-PPPoE" \
+    .c create text 4 4 -anchor nw -text [m "Welcome to RP-PPPoE"] \
 	    -fill red -font {-family times -size -24 -weight bold} -tags pppoe
     .c lower pppoe
 

@@ -1,4 +1,5 @@
 /* config.h.in.  Generated automatically from configure.in by autoheader.  */
+/* LIC: GPL */
 
 /* Define to empty if the keyword does not work.  */
 #undef const
@@ -132,3 +133,8 @@
 
 /* Define if bitfields are packed in reverse order */
 #undef PACK_BITFIELDS_REVERSED
+
+/* Solaris moans if we don't do this... */
+#ifdef __sun
+#define __EXTENSIONS__ 1
+#endif

@@ -8,10 +8,12 @@
 #
 # Copyright (C) 2000 Roaring Penguin Software Inc.
 #
-# $Id: adsl-start.in,v 1.7 2001/06/25 15:00:47 dfs Exp $
+# $Id: adsl-start.in,v 1.8 2002/04/09 17:28:39 dfs Exp $
 #
 # This file may be distributed under the terms of the GNU General
 # Public License.
+#
+# LIC: GPL
 #
 # Usage: adsl-start [config_file]
 #        adsl-start interface user [config_file]

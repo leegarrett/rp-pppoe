@@ -9,11 +9,13 @@
 * This program may be distributed according to the terms of the GNU
 * General Public License, version 2 or (at your option) any later version.
 *
-* $Id: relay.c,v 1.22 2001/06/14 20:59:20 dfs Exp $
+* LIC: GPL
+*
+* $Id: relay.c,v 1.24 2002/04/09 17:28:39 dfs Exp $
 *
 ***********************************************************************/
 static char const RCSID[] =
-"$Id: relay.c,v 1.22 2001/06/14 20:59:20 dfs Exp $";
+"$Id: relay.c,v 1.24 2002/04/09 17:28:39 dfs Exp $";
 
 #define _GNU_SOURCE 1 /* For SA_RESTART */
 
@@ -302,7 +304,7 @@ main(int argc, char *argv[])
     if (sigaction(SIGALRM, &sa, NULL) < 0) {
 	fatalSys("sigaction");
     }
-    
+
     /* Allocate memory for sessions, etc. */
     initRelay(nsess);
 
@@ -529,10 +531,10 @@ createSession(PPPoEInterface const *ac,
 	   cliHash->peerMac[4], cliHash->peerMac[5],
 	   cliHash->interface->name,
 	   ntohs(cliHash->sesNum));
-	   
+
     return sess;
 }
-	    
+
 /**********************************************************************
 *%FUNCTION: freeSession
 *%ARGUMENTS:
@@ -569,7 +571,7 @@ freeSession(PPPoESession *ses, char const *msg)
     if (ses->next) {
 	ses->next->prev = ses->prev;
     }
-       
+
     /* Link onto free list -- this is a singly-linked list, so
        we do not care about prev */
     ses->next = FreeSessions;
@@ -648,7 +650,7 @@ hash(unsigned char const *mac, UINT16_t sesNum)
 	(((unsigned int) mac[1]) << 8) |
 	(((unsigned int) mac[2]) << 16) |
 	(((unsigned int) mac[3]) << 24);
-    unsigned int ans2 = 
+    unsigned int ans2 =
 	((unsigned int) sesNum) |
 	(((unsigned int) mac[4]) << 16) |
 	(((unsigned int) mac[5]) << 24);
@@ -744,7 +746,7 @@ relayLoop()
     int maxFD;
     int i, r;
     int sock;
-    
+
     /* Build the select set */
     FD_ZERO(&readable);
     maxFD = 0;
@@ -1023,7 +1025,7 @@ relayHandlePADI(PPPoEInterface const *iface,
 	       iface->name);
 	return;
     }
-    
+
     /* Get array index of interface */
     ifIndex = iface - Interfaces;
 
@@ -1052,7 +1054,7 @@ relayHandlePADI(PPPoEInterface const *iface,
 	memcpy(packet->ethHdr.h_source, Interfaces[i].mac, ETH_ALEN);
 	sendPacket(NULL, Interfaces[i].discoverySock, packet, size);
     }
-    
+
 }
 
 /**********************************************************************
@@ -1422,7 +1424,7 @@ relayHandlePADS(PPPoEInterface const *iface,
 			       loc + TAG_HDR_SIZE + sizeof(ifIndex),
 			       hu, "RP-PPPoE: Relay: Unable to allocate session");
 		relaySendError(CODE_PADT, packet->session, iface,
-			       packet->ethHdr.h_source, NULL, 
+			       packet->ethHdr.h_source, NULL,
 			       "RP-PPPoE: Relay: Unable to allocate session");
 		return;
 	    }

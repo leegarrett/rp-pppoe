@@ -1,12 +1,60 @@
-rp-pppoe (3.3-1.2) stable-security; urgency=high
+rp-pppoe (3.5-4) unstable; urgency=high
 
-  * Non-maintainer upload by the Security Team
   * Added patch by Max Vozeler <max@hinterhof.net> to ignore -D and -p
     when pppoe is not running as root to prevent a potential root
-    compromise when pppoe is running setuid root [src/pppoe.c,
-    CAN-2004-0564]
+    compromise by users in group dip when pppoe is running setuid root.
+    [src/pppoe.c, CAN-2004-0564] Note that group dip is empty by default
+    on Debian installs.
+  
+ -- Christian Hudon <chrish@debian.org>  Wed, 29 Sep 2004 22:08:20 -0400
 
- -- Martin Schulze <joey@infodrom.org>  Wed, 29 Sep 2004 12:09:08 +0200
+rp-pppoe (3.5-3) unstable; urgency=medium
+
+  * Oops! pppoe should be installed setuid root, not setgid dip to close
+  bugs 102050 and 172376! Still installed without the execute bit for other, so
+  safe from a security standpoint, since group dip is empty by default.
+  * Remove debian/conffiles since debconf 4 creates it.
+
+ -- Christian Hudon <chrish@debian.org>  Tue, 16 Sep 2003 15:06:35 -0400
+
+rp-pppoe (3.5-2) unstable; urgency=low
+
+  * Release based on work done by Marco d'Itri.
+  * Ship /usr/sbin/pppoe sgid dip, but not executable by other.
+  (Closes: #102050, #172376)
+  * Set $PATH in ppp_on_boot.dsl. (Closes: #133580, #138878)
+  * Add to dsl-provider the options noaccomp and default-asyncmap,
+    which are required by the RFC. README.Debian updated.
+    (Closes: #185362, #171549)
+  * Add to dsl-provider the option usepeerdns, as pppd will try to use
+    it by default. README.Debian updated.
+  * Remove from ppp_on_boot.dsl the call to ifconfig, debian pppoe can
+    set up the interface since 3.2-1. README.Debian updated.
+  * Add a note to README.Debian about the kernel options needed by pppoe.
+    (Closes: #159519)
+  * Stop installing KERNEL-MODE-PPPOE, the ppp package provides this.
+  * Remove .pppoe.prcs_aux too in the clean target.
+
+ -- Christian Hudon <chrish@debian.org>  Tue, 16 Sep 2003 14:24:51 -0400
+
+rp-pppoe (3.5-1) unstable; urgency=low
+
+  * New upstream release.
+  * Remove prcs merge log (pppoe.log) during debian/rules clean.
+  * Add note about default-asyncmap to README.Debian, pending further
+    investigation.
+  * Add note to README.Debian about T-Online users needing to quote the 
+    username in the dsl-provider file. (Closes: #132996)
+
+ -- Christian Hudon <chrish@debian.org>  Mon, 24 Mar 2003 20:22:00 -0500
+
+rp-pppoe (3.3-1.2) unstable; urgency=low
+
+  * NMU during bug squashing party.
+  * Applied patch from Thomas Antepoth to src/if.c (closes: #124175),
+    see http://www.voy.com/41165/2/1244.html
+
+ -- Josselin Mouette <joss@debian.org>  Sun,  1 Sep 2002 11:04:12 +0200
 
 rp-pppoe (3.3-1.1) unstable; urgency=low
 

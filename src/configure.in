@@ -1,4 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
+dnl LIC: GPL
 AC_INIT(pppoe.c)
 
 dnl pppd directory for kernel-mode PPPoE
@@ -29,7 +30,7 @@ dnl Check for an echo which supports -n -- another hack for Solaris
 AC_PATH_PROG(ECHO, echo, "", /usr/ucb/bin:$PATH)
 
 dnl Check for sockaddr_ll
-$ECHO -n "checking for struct sockaddr_ll... "
+AC_MSG_CHECKING(for struct sockaddr_ll)
 AC_TRY_COMPILE([#include <asm/types.h>
 #include <linux/if_packet.h>
 #include <linux/if_ether.h>
@@ -41,7 +42,7 @@ AC_DEFINE(HAVE_STRUCT_SOCKADDR_LL)
 fi
 
 dnl Check for N_HDLC line discipline
-$ECHO -n "checking for N_HDLC line discipline... "
+AC_MSG_CHECKING(for N_HDLC line discipline)
 AC_TRY_COMPILE([#include <linux/termios.h>],
 	[int x = N_HDLC;],
 	ac_cv_n_hdlc=yes, ac_cv_n_hdlc=no)
@@ -56,7 +57,7 @@ dnl If we were given "--enable-plugin" without a path, take a stab at where
 dnl the pppd source code might be.
 
 if test "$ac_cv_pluginpath" = "yes" ; then
-	AC_PATH_PROG(PPPD_H, pppd/pppd.h, NOTFOUND, "$PATH:../../$PPPD_DIR")
+	AC_PATH_PROG(PPPD_H, pppd/pppd.h, NOTFOUND, "/usr/include:/usr/local/include:$PATH:../../$PPPD_DIR")
 	if test "$PPPD_H" = "NOTFOUND" ; then
 		ac_cv_pluginpath=no
         else
@@ -71,19 +72,20 @@ LIC_INCDIR=""
 LIC_LIBDIR=""
 LIC_LIB=""
 LIC_DEFINE=""
+LIC_MAKEFILE_INCLUDE=""
 PPPOE_SERVER_DEPS=""
 if test "$ac_cv_licpath" != "no" ; then
 	LIC_INCDIR="-I$ac_cv_licpath"
 	LIC_LIBDIR="-L$ac_cv_licpath -Llicensed-only"
-	LIC_LIB="-ltwofish -llicensed-only -ltcl"
-	PPPOE_SERVER_DEPS="licensed-only/liblicensed-only.a"
-	LIC_DEFINE="-DHAVE_LICENSE=1"
+	if test -d "../../extra-libs" ; then
+	    LIC_LIB="-L../../extra-libs -ltwofish -llicensed-only -ltcl -ldl"
+	else
+	    LIC_LIB="-ltwofish -llicensed-only -ltcl -ldl"
+        fi
+	PPPOE_SERVER_DEPS="licensed-only/liblicensed-only.a ../../SERVPOET-VERSION"
+	LIC_DEFINE="-DHAVE_LICENSE=1 -DSERVPOET_VERSION='\"\$(SERVPOET_VERSION)\"'"
+	LIC_MAKEFILE_INCLUDE="include ../../SERVPOET-VERSION"
 fi
-AC_SUBST(LIC_INCDIR)
-AC_SUBST(LIC_LIBDIR)
-AC_SUBST(LIC_LIB)
-AC_SUBST(LIC_DEFINE)
-AC_SUBST(PPPOE_SERVER_DEPS)
 
 dnl Determine whether or not to build Linux pppd plugin
 LINUX_KERNELMODE_PLUGIN=""
@@ -91,6 +93,7 @@ PPPD_INCDIR=""
 if test "$ac_cv_header_linux_if_pppox_h" = yes ; then
 	if test "$ac_cv_pluginpath" != no ; then
 		LINUX_KERNELMODE_PLUGIN=rp-pppoe.so
+		AC_DEFINE(HAVE_LINUX_KERNEL_PPPOE)
 		PPPD_INCDIR=$ac_cv_pluginpath
 	fi
 fi
@@ -127,7 +130,7 @@ dnl Check for an "id" which accepts "-u" option -- hack for Solaris.
 AC_PATH_PROG(ID, id, "", /usr/xpg4/bin:$PATH)
 
 dnl Check for Linux-specific kernel support for PPPoE
-$ECHO -n "checking for Linux 2.4.X kernel-mode PPPoE support..."
+AC_MSG_CHECKING(for Linux 2.4.X kernel-mode PPPoE support)
 if test "`uname -s`" = "Linux" ; then
 dnl Do a bunch of modprobes.  Can't hurt; might help.
 modprobe ppp_generic > /dev/null 2>&1
@@ -149,8 +152,11 @@ else
 fi
 
 $ECHO $ac_cv_linux_kernel_pppoe
-if test "$ac_cv_linux_kernel_pppoe" = yes ; then
-    AC_DEFINE(HAVE_LINUX_KERNEL_PPPOE)
+if test "$ac_cv_linux_kernel_pppoe" != yes ; then
+   if test "$LINUX_KERNELMODE_PLUGIN" = rp-pppoe.so; then
+      echo "*** Your kernel does not appear to have built-in PPPoE support,"
+      echo "*** but I will build the kernel-mode plugin anyway."
+   fi
 fi
 
 dnl GCC warning level
@@ -202,7 +208,7 @@ case "$PPPD_VERSION" in
 esac
 
 dnl Figure out packing order of structures
-$ECHO -n "checking packing order of bit fields... "
+AC_MSG_CHECKING(packing order of bit fields)
 AC_TRY_RUN([
 union foo {
     struct bar {
@@ -261,18 +267,42 @@ fi
 # plugin is built only if we have kernel support
 if test -n "$LINUX_KERNELMODE_PLUGIN" ; then
 	TARGETS="$TARGETS $LINUX_KERNELMODE_PLUGIN"
+	mkdir plugin > /dev/null 2>&1
 fi
 
 EXTRACONFIGS=""
 # Licensed stuff only for commercial distro (for now)
 if test -n "$LIC_DEFINE" ; then
 	TARGETS="licensed-only $TARGETS"
-	EXTRACONFIGS="licensed-only/Makefile"
+	EXTRACONFIGS="$EXTRACONFIGS licensed-only/Makefile"
 fi
 
-AC_SUBST(TARGETS)
+RDYNAMIC=""
+# L2TP is only in commercial distro (for now)
+if test -n "$LIC_DEFINE" ; then
+	TARGETS="l2tp $TARGETS"
+	EXTRACONFIGS="$EXTRACONFIGS l2tp/Makefile l2tp/handlers/Makefile"
+	LIC_DEFINE="$LIC_DEFINE -DHAVE_L2TP=1"
+	LIC_LIB="$LIC_LIB -Ll2tp -ll2tp"
+	PPPOE_SERVER_DEPS="$PPPOE_SERVER_DEPS l2tp/libl2tp.a"
+	RDYNAMIC="-rdynamic"
+fi
 
-AC_OUTPUT(Makefile ../scripts/adsl-connect ../scripts/adsl-start ../scripts/adsl-stop ../scripts/adsl-init ../scripts/adsl-init-suse ../scripts/adsl-init-turbolinux ../scripts/adsl-setup ../gui/Makefile ../gui/tkpppoe $EXTRACONFIGS)
+LIBEVENT=../libevent
+AC_SUBST(TARGETS)
+AC_SUBST(LIC_INCDIR)
+AC_SUBST(LIC_LIBDIR)
+AC_SUBST(LIC_LIB)
+AC_SUBST(LIC_MAKEFILE_INCLUDE)
+AC_SUBST(LIC_DEFINE)
+AC_SUBST(PPPOE_SERVER_DEPS)
+AC_SUBST(RDYNAMIC)
+AC_SUBST(LIBEVENT)
+
+datadir_evaluated=`eval echo $datadir`
+AC_SUBST(datadir_evaluated)
+
+AC_OUTPUT(Makefile libevent/Makefile ../scripts/adsl-connect ../scripts/adsl-start ../scripts/adsl-stop ../scripts/adsl-init ../scripts/adsl-init-suse ../scripts/adsl-init-turbolinux ../scripts/adsl-setup ../gui/Makefile ../gui/tkpppoe $EXTRACONFIGS)
 
 $ECHO ""
 $ECHO "On this platform, the following targets will be built:"
