@@ -1,0 +1,53 @@
+#!/usr/bin/make -f
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+# This is the debhelper compatibility version to use.
+export DH_COMPAT=1
+
+build: build-stamp
+build-stamp:
+	dh_testdir
+	test -f configure || (aclocal; autoconf)
+	test -f Makefile || ./configure
+	$(MAKE)
+	touch build-stamp
+
+clean:
+	dh_testdir
+	dh_testroot
+	rm -f build-stamp
+	-$(MAKE) clean
+	dh_clean
+
+# Build architecture-independent files here.
+binary-indep: build
+# We have nothing to do by default.
+
+# Build architecture-dependent files here.
+binary-arch: build
+	dh_testversion 1
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs usr/sbin etc/ppp/peers
+	install -s -m 0755 -o root -g root pppoe debian/tmp/usr/sbin/pppoe
+	install -m 0640 -o root -g dip debian/dsl-provider debian/tmp/etc/ppp/peers/dsl-provider
+	dh_installdocs
+	dh_installexamples
+	dh_installmanpages
+	dh_installchangelogs
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_suidregister
+	dh_installdeb
+	dh_shlibdeps
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install

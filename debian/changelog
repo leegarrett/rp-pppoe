@@ -1,0 +1,15 @@
+rp-pppoe (1.0-1) unstable; urgency=low
+
+  * Upgraded to new upstream release.
+  * Added copyright statement in copyright file.
+
+ -- Christian Hudon <chrish@debian.org>  Wed, 12 Jan 2000 20:28:01 -0500
+
+rp-pppoe (0.99b-1) unstable; urgency=low
+
+  * Initial Debian release.
+
+ -- Christian Hudon <chrish@debian.org>  Thu, 30 Dec 1999 21:07:44 -0500
+
+
+

@@ -1,0 +1,10 @@
+pty "pppoe -I eth0 -T 80"
+noipdefault
+defaultroute
+hide-password
+lcp-echo-interval 20
+lcp-echo-failure 3
+mtu 1492
+mru 2400
+noauth
+persist

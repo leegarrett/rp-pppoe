@@ -1,0 +1,37 @@
+		  How to setup your DSL PPPoE connection
+
+Do the following steps as root:
+
+1. Edit the file pap-secrets file, adding a line to the outbound
+connections sections that has the following format:
+
+username@sympatico.ca	  sympatico.ca	    password
+
+Replace 'username' by the username your DSL provider gave you and 'password'
+by your password. This assumes that your provider is Sympatico. If it is
+not, you will also need to replace 'sympatico.ca' by the address of your
+provider.
+
+2. Edit the file /etc/ppp/peers/dsl-provider, adding a line that reads:
+
+user username@sympatico.ca
+
+where what follows 'user' is identical to the first part of the line you
+added to pap-secrets (here 'username@sympatico.ca').
+
+3. Edit the file /etc/init.d/network, adding a line that says:
+
+ifconfig eth0 up
+
+4. Edit the file /etc/init.d/ppp. Find the line in the 'start' section that
+starts pppd and replace the word 'provider' by 'dsl-provider'. That line
+should now look like:
+
+start-stop-daemon --start --quiet --exec /usr/sbin/pppd -- call dsl-provider
+
+5. Create an empty file /etc/ppp/ppp_on_boot by running the command "touch
+/etc/ppp/ppp_on_boot".
+
+Your DSL PPPoE connection is now set up. To start it, execute
+"/etc/init.d/ppp start". The connection will come up automatically the next
+time you boot.
