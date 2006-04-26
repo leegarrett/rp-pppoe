@@ -6,7 +6,7 @@
 *
 * C wrapper designed to run SUID root for controlling PPPoE connections.
 *
-* Copyright (C) 2001 by Roaring Penguin Software Inc.
+* Copyright (C) 2005 by Roaring Penguin Software Inc.
 *
 * LIC: GPL
 *
@@ -15,7 +15,7 @@
 ***********************************************************************/
 
 static char const RCSID[] =
-"$Id: wrapper.c,v 1.9 2002/04/09 17:28:38 dfs Exp $";
+"$Id: wrapper.c,v 1.10 2005/08/09 02:49:15 dfs Exp $";
 
 #define _SVID_SOURCE 1 /* For putenv */
 #define _POSIX_SOURCE 1 /* For fileno */
@@ -30,9 +30,9 @@ static char const RCSID[] =
 #define CONN_NAME_LEN 64
 #define LINELEN 512
 
-static char const *adsl_start = ADSL_START_PATH;
-static char const *adsl_stop = ADSL_STOP_PATH;
-static char const *adsl_status = ADSL_STATUS_PATH;
+static char const *pppoe_start = PPPOE_START_PATH;
+static char const *pppoe_stop = PPPOE_STOP_PATH;
+static char const *pppoe_status = PPPOE_STATUS_PATH;
 
 /**********************************************************************
  *%FUNCTION: PathOK
@@ -126,9 +126,9 @@ CleanEnvironment(char *envp[])
  * argc, argv -- usual suspects
  * Usage: pppoe-wrapper {start|stop|status} {connection_name}
  *%RETURNS:
- * Whatever adsl-start, adsl-stop or adsl-status returns.
+ * Whatever pppoe-start, pppoe-stop or pppoe-status returns.
  *%DESCRIPTION:
- * Runs adsl-start, adsl-stop or adsl-status on given connection if
+ * Runs pppoe-start, pppoe-stop or pppoe-status on given connection if
  * non-root users are allowed to do it.
  **********************************************************************/
 int
@@ -224,14 +224,14 @@ main(int argc, char *argv[])
        
     /* It's OK -- do it.  */
     if (!strcmp(argv[1], "start")) {
-	if (!PathOK(adsl_start)) exit(1);
-	execl(adsl_start, "adsl-start", fname, NULL);
+	if (!PathOK(pppoe_start)) exit(1);
+	execl(pppoe_start, "pppoe-start", fname, NULL);
     } else if (!strcmp(argv[1], "stop")) {
-	if (!PathOK(adsl_stop)) exit(1);
-	execl(adsl_stop, "adsl-stop", fname, NULL);
+	if (!PathOK(pppoe_stop)) exit(1);
+	execl(pppoe_stop, "pppoe-stop", fname, NULL);
     } else {
-	if (!PathOK(adsl_status)) exit(1);
-	execl(adsl_status, "adsl-status", fname, NULL);
+	if (!PathOK(pppoe_status)) exit(1);
+	execl(pppoe_status, "pppoe-status", fname, NULL);
     }
     fprintf(stderr, "%s: execl: %s\n", argv[0], strerror(errno));
     exit(1);

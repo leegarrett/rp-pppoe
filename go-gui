@@ -4,11 +4,11 @@
 #
 # go-gui
 #
-# Quick-start shell script to set up ADSL and GUI wrapper
+# Quick-start shell script to set up PPPoE and GUI wrapper
 #
 # Copyright (C) 2000 Roaring Penguin Software Inc.
 #
-# $Id: go-gui,v 1.4 2002/04/09 17:12:44 dfs Exp $
+# $Id: go-gui,v 1.5 2005/08/09 02:49:09 dfs Exp $
 #***********************************************************************
 
 # GUI only works on Linux
@@ -67,7 +67,7 @@ if test -n "$KDEDIR" ; then
 # KDE Config File
 [KDE Desktop Entry]
 Name=TkPPPoE
-Comment=Start/Stop ADSL connections
+Comment=Start/Stop PPPoE connections
 Exec=tkpppoe
 Terminal=0
 Type=Application
@@ -82,7 +82,7 @@ if test -n "$GNOMEDIR" ; then
 cat <<EOF > "$GNOMEDIR/gnome/apps/Internet/tkpppoe.desktop"
 [Desktop Entry]
 Name=TkPPPoE
-Comment=Start/Stop ADSL connections
+Comment=Start/Stop PPPoE connections
 Exec=tkpppoe
 Terminal=0
 Type=Application

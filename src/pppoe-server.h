@@ -4,14 +4,14 @@
 *
 * Definitions for PPPoE server
 *
-* Copyright (C) 2001 Roaring Penguin Software Inc.
+* Copyright (C) 2001-2006 Roaring Penguin Software Inc.
 *
 * This program may be distributed according to the terms of the GNU
 * General Public License, version 2 or (at your option) any later version.
 *
 * LIC: GPL
 *
-* $Id: pppoe-server.h,v 1.27 2002/06/13 13:16:21 dfs Exp $
+* $Id: pppoe-server.h,v 1.29 2006/02/23 15:40:42 dfs Exp $
 *
 ***********************************************************************/
 

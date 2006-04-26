@@ -1,3 +1,11 @@
+rp-pppoe (3.8-1) unstable; urgency=low
+
+  * New upstream release
+  * Upstream incorporated different version of security patch for -D and -p
+    that drops priviledges for these options. Dropping Debian patch.
+  
+ -- Christian Hudon <chrish@debian.org>  Tue, 25 Apr 2006 20:53:50 -0400
+
 rp-pppoe (3.5-4) unstable; urgency=high
 
   * Added patch by Max Vozeler <max@hinterhof.net> to ignore -D and -p
