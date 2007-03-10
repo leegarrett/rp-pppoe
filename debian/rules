@@ -20,6 +20,8 @@ clean:
 	-$(MAKE) -C gui distclean
 	rm -f src/pppoe-relay
 	-rm -f debian/substvars.debhelper
+	-rm -f config.h config.log config.status
+	-rm -f Makefile libevent/Makefile
 	dh_clean
 
 # Build architecture-independent files here.

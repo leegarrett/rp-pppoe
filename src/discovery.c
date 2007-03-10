@@ -376,8 +376,8 @@ waitForPADO(PPPoEConnection *conn, int timeout)
 	if (!packetIsForMe(conn, &packet)) continue;
 
 	if (packet.code == CODE_PADO) {
-	    if (NOT_UNICAST(packet.ethHdr.h_source)) {
-		printErr("Ignoring PADO packet from non-unicast MAC address");
+	    if (BROADCAST(packet.ethHdr.h_source)) {
+		printErr("Ignoring broadcast PADO packet");
 		continue;
 	    }
 	    parsePacket(&packet, parsePADOTags, &pc);

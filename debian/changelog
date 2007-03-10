@@ -1,3 +1,14 @@
+rp-pppoe (3.8-2) unstable; urgency=low
+
+  * Adopt package.
+  * Cleanup: use orig.tar.gz, remove odd Makefiles and obsolete, sync with
+    upstream, update debian/copyright. Thanks to Florian Weimar.
+  * Set CONNECT_TIMEOUT=0. Closes: #159803, #222746, #251261, #320676
+  * Ignore broadcasted PADO-packets instead of packets from non-unique source
+    address. Closes: #293811
+
+ -- Andreas Barth <aba@not.so.argh.org>  Sat, 10 Mar 2007 17:36:24 +0000
+
 rp-pppoe (3.8-1.1) unstable; urgency=high
 
   * Non-maintainer upload.

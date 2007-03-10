@@ -1,5 +1,5 @@
 Source: rp-pppoe
-Maintainer: Christian Hudon <chrish@debian.org>
+Maintainer: Andreas Barth <aba@not.so.argh.org>
 Standards-Version: 3.6.0
 Section: net
 Priority: optional
