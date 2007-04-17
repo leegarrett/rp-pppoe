@@ -37,15 +37,15 @@ modem is plugged in.
 4. Now, to bring your connection up, do one of the following:
 
  a) If you want your connection to come up automatically (either for an
- always-on connection or if you are using demand-dialing), create a symlink
- to the file ppp_on_boot.dsl called ppp_on_boot by typing the following
- commands into a shell window as root:
+ always-on connection or if you are using demand-dialing), add the following
+ to /etc/network/interfaces:
 
-   cd /etc/ppp
-   ln -s ppp_on_boot.dsl ppp_on_boot
+   auto myisp
+   iface myisp inet ppp
+           provider dsl-provider
 
- To start your pppoe connection, execute "/etc/init.d/ppp start". The
- connection will also come up automatically the next time you boot.
+ To start your pppoe connection, execute "ifup myisp". The connection will 
+ also come up automatically the next time you boot.
 
  (Note that for demand-dialing, you will need to edit the
  /etc/ppp/peers/dsl-provider file and uncomment the lines in section 2.)

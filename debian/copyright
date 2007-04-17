@@ -23,3 +23,6 @@ respective copyright statements are:
  *              Foundation;  either  version 2 of the License, or  (at
  *              your option) any later version.
 
+A patch from Sven Geggus has been applied, which adds the ability to
+set the source MAC address.  According to personal communications,
+this patch is subject to the GPL as well.

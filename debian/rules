@@ -43,8 +43,6 @@ binary-arch: build
 	mv debian/pppoe/usr/man debian/pppoe/usr/share/man
 	install -m 0640 -o root -g dip debian/dsl-provider \
 		debian/pppoe/etc/ppp/peers/dsl-provider
-	install -m 750 -o root -g dip debian/ppp_on_boot.dsl \
-		debian/pppoe/etc/ppp/
 	dh_installdocs
 	dh_installexamples
 #	dh_installmanpages
