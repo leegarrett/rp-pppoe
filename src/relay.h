@@ -4,14 +4,14 @@
 *
 * Definitions for PPPoE relay
 *
-* Copyright (C) 2001 Roaring Penguin Software Inc.
+* Copyright (C) 2001-2006 Roaring Penguin Software Inc.
 *
 * This program may be distributed according to the terms of the GNU
 * General Public License, version 2 or (at your option) any later version.
 *
 * LIC: GPL
 *
-* $Id: relay.h,v 1.11 2002/04/09 17:28:39 dfs Exp $
+* $Id: relay.h,v 1.13 2006/02/23 15:40:42 dfs Exp $
 *
 ***********************************************************************/
 

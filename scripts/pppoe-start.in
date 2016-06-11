@@ -2,21 +2,21 @@
 # @configure_input@
 #***********************************************************************
 #
-# adsl-start
+# pppoe-start
 #
-# Shell script to bring up an ADSL connection
+# Shell script to bring up a PPPoE connection
 #
 # Copyright (C) 2000 Roaring Penguin Software Inc.
 #
-# $Id: adsl-start.in,v 1.8 2002/04/09 17:28:39 dfs Exp $
+# $Id: pppoe-start.in,v 1.2 2005/08/10 00:25:19 dfs Exp $
 #
 # This file may be distributed under the terms of the GNU General
 # Public License.
 #
 # LIC: GPL
 #
-# Usage: adsl-start [config_file]
-#        adsl-start interface user [config_file]
+# Usage: pppoe-start [config_file]
+#        pppoe-start interface user [config_file]
 # Second form overrides USER and ETH from config file.
 # If config_file is omitted, defaults to /etc/ppp/pppoe.conf
 #
@@ -27,7 +27,7 @@ prefix=@prefix@
 exec_prefix=@exec_prefix@
 
 # Paths to programs
-CONNECT=@sbindir@/adsl-connect
+CONNECT=@sbindir@/pppoe-connect
 ECHO=@ECHO@
 IFCONFIG=/sbin/ifconfig
 
@@ -117,7 +117,7 @@ if [ ! -f "$CONFIG" -o ! -r "$CONFIG" ] ; then
     $ECHO "$ME: Cannot read configuration file '$CONFIG'" >& 2
     exit 1
 fi
-
+export CONFIG
 . $CONFIG
 
 # Check for command-line overriding of ETH and USER
@@ -134,7 +134,7 @@ if [ -r "$PIDFILE" ] ; then
     # Check if still running
     kill -0 $PID > /dev/null 2>&1
     if [ $? = 0 ] ; then
-	$ECHO "$ME: There already seems to be an ADSL connection up (PID $PID)" >& 2
+	$ECHO "$ME: There already seems to be a PPPoE connection up (PID $PID)" >& 2
 	exit 1
     fi
     # Delete bogus PIDFILE
@@ -164,7 +164,7 @@ fi
 # Monitor connection
 TIME=0
 while [ true ] ; do
-    @sbindir@/adsl-status $CONFIG > /dev/null 2>&1
+    @sbindir@/pppoe-status $CONFIG > /dev/null 2>&1
 
     # Looks like the interface came up
     if [ $? = 0 ] ; then
@@ -174,9 +174,9 @@ while [ true ] ; do
     fi
 
     if test -n "$FORCEPING" ; then
-	$ECHO -n "$FORCEPING"
+	printf "%s" "$FORCEPING"
     else
-	tty -s && $ECHO -n "$PING"
+	tty -s && printf "%s" "$PING"
     fi
     sleep $CONNECT_POLL
     TIME=`expr $TIME + $CONNECT_POLL`
@@ -186,7 +186,7 @@ while [ true ] ; do
 done
 
 $ECHO "TIMED OUT" >& 2
-# Timed out!  Kill the adsl-connect process and quit
+# Timed out!  Kill the pppoe-connect process and quit
 kill $CONNECT_PID > /dev/null 2>&1
 
 # Clean up PIDFILE(s)

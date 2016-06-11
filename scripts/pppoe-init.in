@@ -1,9 +1,9 @@
 #!/bin/sh
 #
-# adsl                     This script starts or stops an ADSL connection
+# pppoe                     This script starts or stops a PPPoE connection
 #
 # chkconfig: 2345 99 01
-# description: Connects to ADSL provider
+# description: Connects to PPPoE provider
 #
 # LIC: GPL
 #
@@ -19,32 +19,34 @@ prefix=@prefix@
 exec_prefix=@exec_prefix@
 
 # Paths to programs
-START=@sbindir@/adsl-start
-STOP=@sbindir@/adsl-stop
-STATUS=@sbindir@/adsl-status
+START=@sbindir@/pppoe-start
+STOP=@sbindir@/pppoe-stop
+STATUS=@sbindir@/pppoe-status
 case "$1" in
     start)
-        echo -n "Bringing up ADSL link: "
+        echo -n "Bringing up PPPoE link"
 
 	$START
 	if [ $? = 0 ] ; then
-		echo success
-		touch /var/lock/subsys/adsl
+		touch /var/lock/subsys/pppoe
+	        echo_success
 	else
-		echo failure
+		echo_failure
 	fi
+        echo ""
         ;;
 
     stop)
-        echo -n "Shutting down ADSL link: "
+        echo -n "Shutting down PPPoE link"
 
 	$STOP > /dev/null 2>&1
 	if [ $? = 0 ] ; then
-		echo success
-		rm -f /var/lock/subsys/adsl
+		rm -f /var/lock/subsys/pppoe
+	        echo_success
 	else
-		echo failure
+		echo_failure
 	fi
+        echo ""
         ;;
 
     restart)
@@ -57,7 +59,7 @@ case "$1" in
 	;;
 
     *)
-        echo "Usage: adsl {start|stop|restart|status}"
+        echo "Usage: pppoe {start|stop|restart|status}"
         exit 1
 esac
 

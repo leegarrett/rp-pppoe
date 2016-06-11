@@ -1,7 +1,7 @@
 #!/bin/sh
 #***********************************************************************
 #
-# adsl-setup
+# pppoe-setup
 #
 # All-purpose slicing/dicing shell script to configure rp-pppoe.
 #
@@ -9,7 +9,7 @@
 #
 # Copyright (C) 2000 Roaring Penguin Software Inc.
 #
-# $Id: adsl-setup.in,v 1.5 2002/04/09 17:28:39 dfs Exp $
+# $Id: pppoe-setup.in,v 1.2 2005/08/10 00:25:18 dfs Exp $
 #***********************************************************************
 
 # From AUTOCONF
@@ -41,7 +41,7 @@ copy() {
     fi
 }
 
-$ECHO "Welcome to the Roaring Penguin ADSL client setup.  First, I will run"
+$ECHO "Welcome to the Roaring Penguin PPPoE client setup.  First, I will run"
 $ECHO "some checks on your system to make sure the PPPoE client is installed"
 $ECHO "properly..."
 $ECHO ""
@@ -65,7 +65,7 @@ if [ ! -x $PPPD ] ; then
     $ECHO "must install the PPP software suite, version 2.3.10 or later."
     exit 1
 fi
-
+export CONFIG
 . $CONFIG
 
 if [ "$DEMAND" = "" ] ; then
@@ -85,7 +85,7 @@ while [ true ] ; do
     $ECHO ""
     $ECHO "USER NAME"
     $ECHO ""
-    $ECHO -n ">>> Enter your PPPoE user name (default $USER): "
+    printf "%s" ">>> Enter your PPPoE user name (default $USER): "
     read U
 
     if [ "$U" = "" ] ; then
@@ -99,10 +99,10 @@ while [ true ] ; do
     $ECHO ""
     $ECHO "INTERFACE"
     $ECHO ""
-    $ECHO ">>> Enter the Ethernet interface connected to the ADSL modem"
+    $ECHO ">>> Enter the Ethernet interface connected to the DSL modem"
     $ECHO "For Solaris, this is likely to be something like /dev/hme0."
     $ECHO "For Linux, it will be ethn, where 'n' is a number."
-    $ECHO -n "(default $ETH): "
+    printf "%s" "(default $ETH): "
     read E
 
     if [ "$E" = "" ] ; then
@@ -116,7 +116,7 @@ while [ true ] ; do
     $ECHO "stay up permanently, enter 'no' (two letters, lower-case.)"
     $ECHO "NOTE: Demand-activated links do not interact well with dynamic IP"
     $ECHO "addresses.  You may have some problems with demand-activated links."
-    $ECHO -n ">>> Enter the demand value (default $DEMAND): "
+    printf "%s" ">>> Enter the demand value (default $DEMAND): "
     read D
     if [ "$D" = "" ] ; then
 	D=$DEMAND
@@ -130,7 +130,7 @@ while [ true ] ; do
     $ECHO "enter 'server' (all lower-case) here."
     $ECHO "If you just press enter, I will assume you know what you are"
     $ECHO "doing and not modify your DNS setup."
-    $ECHO -n ">>> Enter the DNS information here: "
+    printf "%s" ">>> Enter the DNS information here: "
 
     read DNS1
 
@@ -139,7 +139,7 @@ while [ true ] ; do
         if [ "$DNS1" != "server" ] ; then
 	    $ECHO "Please enter the IP address of your ISP's secondary DNS server."
 	    $ECHO "If you just press enter, I will assume there is only one DNS server."
-	    $ECHO -n ">>> Enter the secondary DNS server address here: "
+	    printf "%s" ">>> Enter the secondary DNS server address here: "
 	    read DNS2
 	fi
     fi
@@ -149,10 +149,10 @@ while [ true ] ; do
 	$ECHO "PASSWORD"
 	$ECHO ""
 	stty -echo
-	$ECHO -n ">>> Please enter your PPPoE password:    "
+	printf "%s" ">>> Please enter your PPPoE password:    "
 	read PWD1
 	$ECHO ""
-	$ECHO -n ">>> Please re-enter your PPPoE password: "
+	printf "%s" ">>> Please re-enter your PPPoE password: "
 	read PWD2
 	$ECHO ""
 	stty echo
@@ -160,7 +160,7 @@ while [ true ] ; do
 	    break
 	fi
 
-	$ECHO -n ">>> Sorry, the passwords do not match.  Try again? (y/n)"
+	printf "%s" ">>> Sorry, the passwords do not match.  Try again? (y/n)"
 	read ANS
 	case "$ANS" in
 	    N|No|NO|Non|n|no|non)
@@ -196,7 +196,7 @@ while [ true ] ; do
 	    $ECHO "1 - STANDALONE: Appropriate for a basic stand-alone web-surfing workstation"
 	    $ECHO "2 - MASQUERADE: Appropriate for a machine acting as an Internet gateway"
 	    $ECHO "                for a LAN"
-	    $ECHO -n ">>> Choose a type of firewall (0-2): "
+	    printf "%s" ">>> Choose a type of firewall (0-2): "
 	    read a
 	    if [ "$a" = 0 -o "$a" = 1 -o "$a" = 2 ] ; then
 		break
@@ -243,7 +243,7 @@ while [ true ] ; do
     $ECHO "Firewalling:        $FIREWALL"
     $ECHO ""
     while [ true ] ; do
-        $ECHO -n '>>> Accept these settings and adjust configuration files (y/n)? '
+        printf "%s" '>>> Accept these settings and adjust configuration files (y/n)? '
         read ANS
 	case "ANS" in
 	    Y|y|yes|Yes|oui|Oui)
@@ -290,7 +290,7 @@ fi
 # Some #$(*& ISP's use a slash in the user name...
 sed -e "s&^USER=.*&USER='$U'&" \
     -e "s&^ETH=.*&ETH='$E'&" \
-    -e "s&^PIDFILE=.*&PIDFILE=\"$VARRUN/\$CF_BASE-adsl.pid\"&" \
+    -e "s&^PIDFILE=.*&PIDFILE=\"$VARRUN/\$CF_BASE-pppoe.pid\"&" \
     -e "s/^FIREWALL=.*/FIREWALL=$FIREWALL/" \
     -e "s/^DEMAND=.*/DEMAND=$D/" \
     -e "s/^DNSTYPE=.*/DNSTYPE=$DNSTYPE/" \
@@ -347,6 +347,6 @@ $ECHO ""
 $ECHO ""
 $ECHO "Congratulations, it should be all set up!"
 $ECHO ""
-$ECHO "Type 'adsl-start' to bring up your ADSL link and 'adsl-stop' to bring"
-$ECHO "it down.  Type 'adsl-status' to see the link status."
+$ECHO "Type 'pppoe-start' to bring up your PPPoE link and 'pppoe-stop' to bring"
+$ECHO "it down.  Type 'pppoe-status' to see the link status."
 exit 0

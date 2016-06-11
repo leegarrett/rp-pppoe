@@ -12,7 +12,7 @@
 #
 # LIC: GPL
 #
-# $Id: Makefile.in,v 1.7 2002/04/09 17:28:38 dfs Exp $
+# $Id: Makefile.in,v 1.8 2005/08/09 02:49:14 dfs Exp $
 #***********************************************************************
 DEFINES=
 prefix=@prefix@
@@ -24,11 +24,11 @@ sbindir=@sbindir@
 bindir=@bindir@
 datadir=@datadir@
 
-ADSL_START_PATH=@sbindir@/adsl-start
-ADSL_STOP_PATH=@sbindir@/adsl-stop
-ADSL_STATUS_PATH=@sbindir@/adsl-status
+PPPOE_START_PATH=@sbindir@/pppoe-start
+PPPOE_STOP_PATH=@sbindir@/pppoe-stop
+PPPOE_STATUS_PATH=@sbindir@/pppoe-status
 
-PATHS='-DADSL_START_PATH="$(ADSL_START_PATH)"' '-DADSL_STOP_PATH="$(ADSL_STOP_PATH)"' '-DADSL_STATUS_PATH="$(ADSL_STATUS_PATH)"'
+PATHS='-DPPPOE_START_PATH="$(PPPOE_START_PATH)"' '-DPPPOE_STOP_PATH="$(PPPOE_STOP_PATH)"' '-DPPPOE_STATUS_PATH="$(PPPOE_STATUS_PATH)"'
 
 CFLAGS= @CFLAGS@ $(DEFINES) $(PATHS)
 

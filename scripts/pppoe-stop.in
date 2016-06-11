@@ -2,20 +2,20 @@
 # @configure_input@
 #***********************************************************************
 #
-# adsl-stop
+# pppoe-stop
 #
-# Shell script to bring down an ADSL connection
+# Shell script to bring down a PPPoE connection
 #
 # Copyright (C) 2000 Roaring Penguin Software Inc.
 #
-# $Id: adsl-stop.in,v 1.5 2002/04/09 17:28:39 dfs Exp $
+# $Id: pppoe-stop.in,v 1.2 2005/08/10 00:25:19 dfs Exp $
 #
 # This file may be distributed under the terms of the GNU General
 # Public License.
 #
 # LIC: GPL
 #
-# Usage: adsl-stop [config_file]
+# Usage: pppoe-stop [config_file]
 # If config_file is omitted, defaults to /etc/ppp/pppoe.conf
 #
 #***********************************************************************
@@ -35,7 +35,7 @@ if [ ! -f "$CONFIG" -o ! -r "$CONFIG" ] ; then
     echo "$ME: Cannot read configuration file '$CONFIG'" >& 2
     exit 1
 fi
-
+export CONFIG
 . $CONFIG
 
 PPPOE_PIDFILE="$PIDFILE.pppoe"
@@ -57,7 +57,7 @@ if [ -r "$PIDFILE" ] ; then
     # Check if still running
     kill -0 $PID > /dev/null 2>&1
     if [ $? != 0 ] ; then
-	echo "$ME: The adsl-connect script (PID $PID) appears to have died" >& 2
+	echo "$ME: The pppoe-connect script (PID $PID) appears to have died" >& 2
     fi
 
     # Kill pppd, which should in turn kill pppoe
@@ -68,22 +68,28 @@ if [ -r "$PIDFILE" ] ; then
 	kill $PPPD_PID > /dev/null 2>&1 || exit 1
     fi
 
-    # Kill adsl-start
+    # Kill pppoe-start
     PIDS=`cat $STARTPID`
     kill -0 $PIDS > /dev/null 2>&1
     if [ $? = 0 ] ; then
-	$LOGGER -p daemon.notice "Killing adsl-connect"
+	$LOGGER -p daemon.notice "Killing pppoe-connect"
 	kill $PIDS > /dev/null 2>&1
     fi
 
-    # Kill adsl-connect
-    $LOGGER -p daemon.notice "Killing adsl-connect"
-    echo "Killing adsl-connect ($PID)"
-    kill $PID > /dev/null 2>&1
+    # Kill pppoe-connect
+    $LOGGER -p daemon.notice "Killing pppoe-connect"
+    echo "Killing pppoe-connect ($PID)"
+    kill -9 $PID > /dev/null 2>&1
+
+    # Kill pppd again, in case it's still hanging around
+    if [ -r "$PPPD_PIDFILE" ] ; then
+	PPPD_PID=`cat "$PPPD_PIDFILE"`
+	kill -9 $PPPD_PID > /dev/null 2>&1 || exit 1
+    fi
 
     rm -f "$PIDFILE" "$PPPD_PIDFILE" "$PPPOE_PIDFILE" "$STARTPID"
 else
-    echo "$ME: No ADSL connection appears to be running" >&2
+    echo "$ME: No PPPoE connection appears to be running" >&2
     exit 1
 fi
 
