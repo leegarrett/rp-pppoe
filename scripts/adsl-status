@@ -7,10 +7,12 @@
 #
 # Copyright (C) 2000-2001 Roaring Penguin Software Inc.
 #
-# $Id: adsl-status,v 1.2 2001/01/15 19:15:07 dfs Exp $
+# $Id: adsl-status,v 1.3 2002/04/09 17:28:39 dfs Exp $
 #
 # This file may be distributed under the terms of the GNU General
 # Public License.
+#
+# LIC: GPL
 #
 # Usage: adsl-status [config_file]
 # If config_file is omitted, defaults to /etc/ppp/pppoe.conf

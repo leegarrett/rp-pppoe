@@ -8,10 +8,12 @@
 #
 # Copyright (C) 2000 Roaring Penguin Software Inc.
 #
-# $Id: adsl-connect.in,v 1.17 2001/09/14 19:07:42 dfs Exp $
+# $Id: adsl-connect.in,v 1.23 2002/04/09 17:28:39 dfs Exp $
 #
 # This file may be distributed under the terms of the GNU General
 # Public License.
+#
+# LIC: GPL
 #
 # Usage: adsl-connect [config_file]
 #        adsl-connect interface user [config_file]
@@ -53,11 +55,11 @@ ETH=""
 # Sort out command-line arguments
 case "$#" in
     1)
-	CONFIG="$1"
-	;;
+    CONFIG="$1"
+    ;;
     3)
-	CONFIG="$3"
-	;;
+    CONFIG="$3"
+    ;;
 esac
 
 if test ! -f "$CONFIG" -o ! -r "$CONFIG" ; then
@@ -73,9 +75,9 @@ PPPD_PIDFILE="$PIDFILE.pppd"
 # Check for command-line overriding of ETH and USER
 case "$#" in
     2|3)
-	ETH="$1"
-	USER="$2"
-	;;
+    ETH="$1"
+    USER="$2"
+    ;;
 esac
 
 # Check that config file is sane
@@ -125,15 +127,15 @@ if test `uname -s` = Linux ; then
 fi
 
 if test "$SYNCHRONOUS" = "yes" ; then
-	PPPOE_SYNC=-s
-	PPPD_SYNC=sync
+    PPPOE_SYNC=-s
+    PPPD_SYNC=sync
 	# Increase the chances of it working on Linux...
-	if test `uname -s` = Linux ; then
-	    modprobe n_hdlc > /dev/null 2>&1
-	fi
+    if test `uname -s` = Linux ; then
+	modprobe n_hdlc > /dev/null 2>&1
+    fi
 else
-	PPPOE_SYNC=""
-	PPPD_SYNC=""
+    PPPOE_SYNC=""
+    PPPD_SYNC=""
 fi
 
 if test -n "$ACNAME" ; then
@@ -141,49 +143,67 @@ if test -n "$ACNAME" ; then
 fi
 
 if test -n "$SERVICENAME" ; then
-    SERVICENAME="-S $SERVICENAME"
+    SERVICENAMEOPT="-S $SERVICENAME"
+else
+    SERVICENAMEOPT=""
 fi
 
 if test "$CLAMPMSS" = "no" ; then
-	CLAMPMSS=""
+    CLAMPMSS=""
 else
-	CLAMPMSS="-m $CLAMPMSS"
+    CLAMPMSS="-m $CLAMPMSS"
 fi
 
 # If DNSTYPE is SERVER, we must use "usepeerdns" option to pppd.
 if test "$DNSTYPE" = "SERVER" ; then
-	USEPEERDNS=yes
+    PEERDNS=yes
+    USEPEERDNS=yes
 fi
 
-if test "$USEPEERDNS" = "yes" ; then
-	USEPEERDNS="usepeerdns"
+if test "$PEERDNS" = "yes" ; then
+    PEERDNS="usepeerdns"
 else
-	USEPEERDNS=""
+    PEERDNS=""
 fi
+
+# Backward config file compatibility -- PEERDNS used to be USEPEERDNS
+if test "$USEPEERDNS" = "yes" ; then
+    PEERDNS="usepeerdns"
+fi
+if test "$USEPEERDNS" = "no" ; then
+    PEERDNS=""
+fi
+
 
 # Backward config file compatibility
 if test "$DEMAND" = "" ; then
-	DEMAND=no
+    DEMAND=no
 fi
 
 if test "$DEMAND" = "no" ; then
-	DEMAND=""
+    DEMAND=""
 else
-	DEMAND="demand persist idle $DEMAND 10.112.112.112:10.112.112.113 ipcp-accept-remote ipcp-accept-local connect true noipdefault ktune"
+    DEMAND="demand persist idle $DEMAND 10.112.112.112:10.112.112.113 ipcp-accept-remote ipcp-accept-local connect true noipdefault ktune"
 fi
 
 case "$FIREWALL" in
     STANDALONE)
-	. /etc/ppp/firewall-standalone
-	;;
+    . /etc/ppp/firewall-standalone
+    ;;
     MASQUERADE)
-	. /etc/ppp/firewall-masq
-	;;
+    . /etc/ppp/firewall-masq
+    ;;
 esac
 
 # If we're using kernel-mode PPPoE on Linux...
 if test "$LINUX_PLUGIN" != "" ; then
-    PLUGIN_OPTS="plugin $LINUX_PLUGIN $ETH"
+    PLUGIN_OPTS="plugin $LINUX_PLUGIN"
+    if test -n "$SERVICENAME" ; then
+	PLUGIN_OPTS="$PLUGIN_OPTS rp_pppoe_service $SERVICENAME"
+    fi
+
+    # Interface name MUST BE LAST!!
+    PLUGIN_OPTS="$PLUGIN_OPTS $ETH"
     modprobe pppoe > /dev/null 2>&1
 fi
 
@@ -194,7 +214,7 @@ else
 fi
 
 # Standard PPP options we always use
-PPP_STD_OPTIONS="$PLUGIN_OPTS noipdefault noauth default-asyncmap $DEFAULTROUTE hide-password nodetach $USEPEERDNS mtu 1492 mru 1492 noaccomp noccp nobsdcomp nodeflate nopcomp novj novjccomp user $USER lcp-echo-interval $LCP_INTERVAL lcp-echo-failure $LCP_FAILURE $PPPD_EXTRA"
+PPP_STD_OPTIONS="$PLUGIN_OPTS noipdefault noauth default-asyncmap $DEFAULTROUTE hide-password nodetach $PEERDNS mtu 1492 mru 1492 noaccomp noccp nobsdcomp nodeflate nopcomp novj novjccomp user $USER lcp-echo-interval $LCP_INTERVAL lcp-echo-failure $LCP_FAILURE $PPPD_EXTRA"
 
 # Jigger DNS if required...
 if test "$DNSTYPE" = "SERVER" ; then
@@ -211,7 +231,7 @@ elif test "$DNSTYPE" = "SPECIFY" ; then
 fi
 
 # PPPoE invocation
-PPPOE_CMD="$PPPOE -p $PPPOE_PIDFILE -I $ETH -T $PPPOE_TIMEOUT -U $PPPOE_SYNC $CLAMPMSS $ACNAME $SERVICENAME $PPPOE_EXTRA"
+PPPOE_CMD="$PPPOE -p $PPPOE_PIDFILE -I $ETH -T $PPPOE_TIMEOUT -U $PPPOE_SYNC $CLAMPMSS $ACNAME $SERVICENAMEOPT $PPPOE_EXTRA"
 if test "$DEBUG" != "" ; then
     if test "$DEMAND" != "" ; then
 	echo "(Turning off DEMAND for debugging purposes)"
@@ -253,9 +273,9 @@ if test "$DEBUG" != "" ; then
     cat $DEBUG-0 >> $DEBUG
     rm -f $DEBUG-0
     for i in 1 2 3 4 5 6 7 8 9 10 ; do
-    echo ""
-    echo ""
-    echo ""
+	echo ""
+	echo ""
+	echo ""
     done
     echo "*** Finished debugging run.  Please review the file"
     echo "*** '$DEBUG' and try to"
@@ -271,7 +291,10 @@ fi
 echo $$ > $PIDFILE
 
 while [ true ] ; do
-    if test "$LINUX_PLUGIN" != "" ; then
+    if test "$OVERRIDE_PPPD_COMMAND" != "" ; then
+	$SETSID $OVERRIDE_PPPD_COMMAND &
+	echo "$!" > $PPPD_PIDFILE
+    elif test "$LINUX_PLUGIN" != "" ; then
 	$SETSID $PPPD $PPP_STD_OPTIONS $DEMAND &
 	echo "$!" > $PPPD_PIDFILE
     else
@@ -282,6 +305,10 @@ while [ true ] ; do
 	echo "$!" > $PPPD_PIDFILE
     fi
     wait
+
+    if test "$RETRY_ON_FAILURE" = "no" ; then
+	exit
+    fi
 
     # Run /etc/ppp/adsl-lost if it exists
     test -x /etc/ppp/adsl-lost && /etc/ppp/adsl-lost

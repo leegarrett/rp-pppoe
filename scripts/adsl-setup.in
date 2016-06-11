@@ -5,9 +5,11 @@
 #
 # All-purpose slicing/dicing shell script to configure rp-pppoe.
 #
+# LIC: GPL
+#
 # Copyright (C) 2000 Roaring Penguin Software Inc.
 #
-# $Id: adsl-setup.in,v 1.3 2001/04/02 13:59:14 dfs Exp $
+# $Id: adsl-setup.in,v 1.5 2002/04/09 17:28:39 dfs Exp $
 #***********************************************************************
 
 # From AUTOCONF
@@ -268,9 +270,9 @@ copy $CONFIG $CONFIG-bak
 if [ "$DNS1" = "server" ] ; then
     DNSTYPE=SERVER
     DNS1=""
-    USEPEERDNS=yes
+    PEERDNS=yes
 else
-    USEPEERDNS=no
+    PEERDNS=no
     if [ "$DNS1" = "" ] ; then
 	DNSTYPE=NOCHANGE
     else
@@ -294,7 +296,7 @@ sed -e "s&^USER=.*&USER='$U'&" \
     -e "s/^DNSTYPE=.*/DNSTYPE=$DNSTYPE/" \
     -e "s/^DNS1=.*/DNS1=$DNS1/" \
     -e "s/^DNS2=.*/DNS2=$DNS2/" \
-    -e "s/^USEPEERDNS=.*/USEPEERDNS=$USEPEERDNS/" \
+    -e "s/^PEERDNS=.*/PEERDNS=$PEERDNS/" \
     < $CONFIG-bak > $CONFIG
 
 if [ $? != 0 ] ; then

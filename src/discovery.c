@@ -6,10 +6,12 @@
 *
 * Copyright (C) 1999 by Roaring Penguin Software Inc.
 *
+* LIC: GPL
+*
 ***********************************************************************/
 
 static char const RCSID[] =
-"$Id: discovery.c,v 1.15 2001/07/13 13:22:16 dfs Exp $";
+"$Id: discovery.c,v 1.18 2002/04/09 17:28:39 dfs Exp $";
 
 #include "pppoe.h"
 
@@ -322,12 +324,12 @@ waitForPADO(PPPoEConnection *conn, int timeout)
     pc.serviceNameOK = (conn->serviceName) ? 0 : 1;
     pc.seenACName    = 0;
     pc.seenServiceName = 0;
-	
+
     do {
 	if (BPF_BUFFER_IS_EMPTY) {
 	    tv.tv_sec = timeout;
 	    tv.tv_usec = 0;
-	
+
 	    FD_ZERO(&readable);
 	    FD_SET(conn->discoverySocket, &readable);
 
@@ -340,7 +342,7 @@ waitForPADO(PPPoEConnection *conn, int timeout)
 	    }
 	    if (r == 0) return;        /* Timed out */
 	}
-	
+
 	/* Get the packet */
 	receivePacket(conn->discoverySocket, &packet, &len);
 
@@ -379,19 +381,17 @@ waitForPADO(PPPoEConnection *conn, int timeout)
 		continue;
 	    }
 	    conn->numPADOs++;
-	    if (conn->printACNames) {
-		printf("--------------------------------------------------\n");
-	    }
 	    if (pc.acNameOK && pc.serviceNameOK) {
 		memcpy(conn->peerEth, packet.ethHdr.h_source, ETH_ALEN);
 		if (conn->printACNames) {
 		    printf("AC-Ethernet-Address: %02x:%02x:%02x:%02x:%02x:%02x\n",
-			   (unsigned) conn->peerEth[0], 
+			   (unsigned) conn->peerEth[0],
 			   (unsigned) conn->peerEth[1],
 			   (unsigned) conn->peerEth[2],
 			   (unsigned) conn->peerEth[3],
 			   (unsigned) conn->peerEth[4],
 			   (unsigned) conn->peerEth[5]);
+		    printf("--------------------------------------------------\n");
 		    continue;
 		}
 		conn->discoveryState = STATE_RECEIVED_PADO;
@@ -504,10 +504,10 @@ waitForPADS(PPPoEConnection *conn, int timeout)
 	if (BPF_BUFFER_IS_EMPTY) {
 	    tv.tv_sec = timeout;
 	    tv.tv_usec = 0;
-	    
+
 	    FD_ZERO(&readable);
 	    FD_SET(conn->discoverySocket, &readable);
-	    
+
 	    while(1) {
 		r = select(conn->discoverySocket+1, &readable, NULL, NULL, &tv);
 		if (r >= 0 || errno != EINTR) break;
@@ -621,7 +621,6 @@ discovery(PPPoEConnection *conn)
 
     /* If we're only printing access concentrator names, we're done */
     if (conn->printACNames) {
-	printf("--------------------------------------------------\n");
 	exit(0);
     }
 
@@ -641,4 +640,3 @@ discovery(PPPoEConnection *conn)
     conn->discoveryState = STATE_SESSION;
     return;
 }
-

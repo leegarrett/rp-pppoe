@@ -9,13 +9,11 @@
 * This program may be distributed according to the terms of the GNU
 * General Public License, version 2 or (at your option) any later version.
 *
-* $Id: pppoe.h,v 1.21 2001/07/28 02:09:54 dfs Exp $
+* LIC: GPL
+*
+* $Id: pppoe.h,v 1.25 2002/07/05 19:32:50 dfs Exp $
 *
 ***********************************************************************/
-
-#ifdef __sun__
-#define __EXTENSIONS__
-#endif
 
 #include "config.h"
 
@@ -160,6 +158,12 @@ extern UINT16_t Eth_PPPOE_Session;
 #define CODE_PADR           0x19
 #define CODE_PADS           0x65
 #define CODE_PADT           0xA7
+
+/* Extensions from draft-carrel-info-pppoe-ext-00 */
+/* I do NOT like PADM or PADN, but they are here for completeness */
+#define CODE_PADM           0xD3
+#define CODE_PADN           0xD4
+
 #define CODE_SESS           0x00
 
 /* PPPoE Tags */
@@ -173,6 +177,12 @@ extern UINT16_t Eth_PPPOE_Session;
 #define TAG_SERVICE_NAME_ERROR 0x0201
 #define TAG_AC_SYSTEM_ERROR    0x0202
 #define TAG_GENERIC_ERROR      0x0203
+
+/* Extensions from draft-carrel-info-pppoe-ext-00 */
+/* I do NOT like these tags one little bit */
+#define TAG_HURL               0x111
+#define TAG_MOTM               0x112
+#define TAG_IP_ROUTE_ADD       0x121
 
 /* Discovery phase states */
 #define STATE_SENT_PADI     0
@@ -298,6 +308,8 @@ void asyncReadFromEth(PPPoEConnection *conn, int sock, int clampMss);
 void syncReadFromEth(PPPoEConnection *conn, int sock, int clampMss);
 char *strDup(char const *str);
 void sendPADT(PPPoEConnection *conn, char const *msg);
+void sendPADTf(PPPoEConnection *conn, char const *fmt, ...);
+
 void sendSessionPacket(PPPoEConnection *conn,
 		       PPPoEPacket *packet, int len);
 void initPPP(void);

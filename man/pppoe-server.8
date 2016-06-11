@@ -1,4 +1,5 @@
-.\" $Id: pppoe-server.8,v 1.6 2001/09/06 13:02:47 dfs Exp $ 
+.\" $Id: pppoe-server.8,v 1.9 2002/05/16 15:41:15 dfs Exp $ 
+.\" LIC: GPL
 .TH PPPOE-SERVER 8 "3 July 2000"
 .\""
 .UC 4
@@ -30,7 +31,7 @@ server to respond on more than one interface.
 .TP
 .B \-T \fItimeout\fR
 This option is passed directly to \fBpppoe\fR; see \fBpppoe\fR(8) for
-details.
+details.  If you are using kernel-mode PPPoE, this option has \fIno effect\fR.
 
 .TP
 .B \-C \fIac_name\fR
@@ -38,9 +39,17 @@ Specifies which name to report as the access concentrator name.  If not
 supplied, the host name is used.
 
 .TP
+.B \-S \fIname\fR
+Offer a service named \fIname\fR.  Multiple \fB\-S\fR options may
+be specified; each one causes the named service to be advertised
+in a Service-Name tag in the PADO frame.  The first \fB\-S\fR option
+specifies the default service, and is used if the PPPoE client
+requests a Service-Name of length zero.
+
+.TP
 .B \-m \fIMSS\fR
 This option is passed directly to \fBpppoe\fR; see \fBpppoe\fR(8) for
-details.
+details.  If you are using kernel-mode PPPoE, this option has \fIno effect\fR.
 
 .TP
 .B \-s

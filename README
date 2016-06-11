@@ -1,3 +1,5 @@
+# LIC: GPL
+
 pppoe: a PPP-over-Ethernet redirector for pppd
 Copyright (C) 2001 Roaring Penguin Software Inc.
 

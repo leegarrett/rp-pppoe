@@ -1269,9 +1269,10 @@ else
 fi
 
 
-$ECHO -n "checking for struct sockaddr_ll... "
+echo $ac_n "checking for struct sockaddr_ll""... $ac_c" 1>&6
+echo "configure:1274: checking for struct sockaddr_ll" >&5
 cat > conftest.$ac_ext <<EOF
-#line 1275 "configure"
+#line 1276 "configure"
 #include "confdefs.h"
 #include <asm/types.h>
 #include <linux/if_packet.h>
@@ -1281,7 +1282,7 @@ int main() {
 struct sockaddr_ll sa;
 ; return 0; }
 EOF
-if { (eval echo configure:1285: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:1286: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_struct_sockaddr_ll=yes
 else
@@ -1299,16 +1300,17 @@ EOF
 
 fi
 
-$ECHO -n "checking for N_HDLC line discipline... "
+echo $ac_n "checking for N_HDLC line discipline""... $ac_c" 1>&6
+echo "configure:1305: checking for N_HDLC line discipline" >&5
 cat > conftest.$ac_ext <<EOF
-#line 1305 "configure"
+#line 1307 "configure"
 #include "confdefs.h"
 #include <linux/termios.h>
 int main() {
 int x = N_HDLC;
 ; return 0; }
 EOF
-if { (eval echo configure:1312: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:1314: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_n_hdlc=yes
 else
@@ -1340,7 +1342,7 @@ if test "$ac_cv_pluginpath" = "yes" ; then
 	# Extract the first word of "pppd/pppd.h", so it can be a program name with args.
 set dummy pppd/pppd.h; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:1344: checking for $ac_word" >&5
+echo "configure:1346: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_PPPD_H'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1353,7 +1355,7 @@ else
   ;;
   *)
   IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS=":"
-  ac_dummy=""$PATH:../../$PPPD_DIR""
+  ac_dummy=""/usr/include:/usr/local/include:$PATH:../../$PPPD_DIR""
   for ac_dir in $ac_dummy; do 
     test -z "$ac_dir" && ac_dir=.
     if test -f $ac_dir/$ac_word; then
@@ -1394,25 +1396,30 @@ LIC_INCDIR=""
 LIC_LIBDIR=""
 LIC_LIB=""
 LIC_DEFINE=""
+LIC_MAKEFILE_INCLUDE=""
 PPPOE_SERVER_DEPS=""
 if test "$ac_cv_licpath" != "no" ; then
 	LIC_INCDIR="-I$ac_cv_licpath"
 	LIC_LIBDIR="-L$ac_cv_licpath -Llicensed-only"
-	LIC_LIB="-ltwofish -llicensed-only -ltcl"
-	PPPOE_SERVER_DEPS="licensed-only/liblicensed-only.a"
-	LIC_DEFINE="-DHAVE_LICENSE=1"
+	if test -d "../../extra-libs" ; then
+	    LIC_LIB="-L../../extra-libs -ltwofish -llicensed-only -ltcl -ldl"
+	else
+	    LIC_LIB="-ltwofish -llicensed-only -ltcl -ldl"
+        fi
+	PPPOE_SERVER_DEPS="licensed-only/liblicensed-only.a ../../SERVPOET-VERSION"
+	LIC_DEFINE="-DHAVE_LICENSE=1 -DSERVPOET_VERSION='\"\$(SERVPOET_VERSION)\"'"
+	LIC_MAKEFILE_INCLUDE="include ../../SERVPOET-VERSION"
 fi
-
-
-
-
-
 
 LINUX_KERNELMODE_PLUGIN=""
 PPPD_INCDIR=""
 if test "$ac_cv_header_linux_if_pppox_h" = yes ; then
 	if test "$ac_cv_pluginpath" != no ; then
 		LINUX_KERNELMODE_PLUGIN=rp-pppoe.so
+		cat >> confdefs.h <<\EOF
+#define HAVE_LINUX_KERNEL_PPPOE 1
+EOF
+
 		PPPD_INCDIR=$ac_cv_pluginpath
 	fi
 fi
@@ -1427,7 +1434,7 @@ fi
 
 
 echo $ac_n "checking for 8-bit clean memcmp""... $ac_c" 1>&6
-echo "configure:1431: checking for 8-bit clean memcmp" >&5
+echo "configure:1438: checking for 8-bit clean memcmp" >&5
 if eval "test \"`echo '$''{'ac_cv_func_memcmp_clean'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1435,7 +1442,7 @@ else
   ac_cv_func_memcmp_clean=no
 else
   cat > conftest.$ac_ext <<EOF
-#line 1439 "configure"
+#line 1446 "configure"
 #include "confdefs.h"
 
 main()
@@ -1445,7 +1452,7 @@ main()
 }
 
 EOF
-if { (eval echo configure:1449: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
+if { (eval echo configure:1456: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
 then
   ac_cv_func_memcmp_clean=yes
 else
@@ -1463,7 +1470,7 @@ echo "$ac_t""$ac_cv_func_memcmp_clean" 1>&6
 test $ac_cv_func_memcmp_clean = no && LIBOBJS="$LIBOBJS memcmp.${ac_objext}"
 
 echo $ac_n "checking whether setvbuf arguments are reversed""... $ac_c" 1>&6
-echo "configure:1467: checking whether setvbuf arguments are reversed" >&5
+echo "configure:1474: checking whether setvbuf arguments are reversed" >&5
 if eval "test \"`echo '$''{'ac_cv_func_setvbuf_reversed'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1471,7 +1478,7 @@ else
     { echo "configure: error: can not run test program while cross compiling" 1>&2; exit 1; }
 else
   cat > conftest.$ac_ext <<EOF
-#line 1475 "configure"
+#line 1482 "configure"
 #include "confdefs.h"
 #include <stdio.h>
 /* If setvbuf has the reversed format, exit 0. */
@@ -1485,7 +1492,7 @@ main () {
   exit(0);			/* Non-reversed systems segv here.  */
 }
 EOF
-if { (eval echo configure:1489: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
+if { (eval echo configure:1496: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
 then
   ac_cv_func_setvbuf_reversed=yes
 else
@@ -1509,12 +1516,12 @@ EOF
 fi
 
 echo $ac_n "checking return type of signal handlers""... $ac_c" 1>&6
-echo "configure:1513: checking return type of signal handlers" >&5
+echo "configure:1520: checking return type of signal handlers" >&5
 if eval "test \"`echo '$''{'ac_cv_type_signal'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1518 "configure"
+#line 1525 "configure"
 #include "confdefs.h"
 #include <sys/types.h>
 #include <signal.h>
@@ -1531,7 +1538,7 @@ int main() {
 int i;
 ; return 0; }
 EOF
-if { (eval echo configure:1535: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:1542: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_type_signal=void
 else
@@ -1552,12 +1559,12 @@ EOF
 for ac_func in select socket strerror strtol
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
-echo "configure:1556: checking for $ac_func" >&5
+echo "configure:1563: checking for $ac_func" >&5
 if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1561 "configure"
+#line 1568 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1580,7 +1587,7 @@ $ac_func();
 
 ; return 0; }
 EOF
-if { (eval echo configure:1584: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:1591: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_func_$ac_func=yes"
 else
@@ -1635,7 +1642,7 @@ ac_configure=$ac_aux_dir/configure # This should be Cygnus configure.
 # SVR4 /usr/ucb/install, which tries to use the nonexistent group "staff"
 # ./install, which can be erroneously created by make from ./install.sh.
 echo $ac_n "checking for a BSD compatible install""... $ac_c" 1>&6
-echo "configure:1639: checking for a BSD compatible install" >&5
+echo "configure:1646: checking for a BSD compatible install" >&5
 if test -z "$INSTALL"; then
 if eval "test \"`echo '$''{'ac_cv_path_install'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -1689,7 +1696,7 @@ test -z "$INSTALL_DATA" && INSTALL_DATA='${INSTALL} -m 644'
 
 
 echo $ac_n "checking size of unsigned short""... $ac_c" 1>&6
-echo "configure:1693: checking size of unsigned short" >&5
+echo "configure:1700: checking size of unsigned short" >&5
 if eval "test \"`echo '$''{'ac_cv_sizeof_unsigned_short'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1697,7 +1704,7 @@ else
     { echo "configure: error: can not run test program while cross compiling" 1>&2; exit 1; }
 else
   cat > conftest.$ac_ext <<EOF
-#line 1701 "configure"
+#line 1708 "configure"
 #include "confdefs.h"
 #include <stdio.h>
 main()
@@ -1708,7 +1715,7 @@ main()
   exit(0);
 }
 EOF
-if { (eval echo configure:1712: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
+if { (eval echo configure:1719: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
 then
   ac_cv_sizeof_unsigned_short=`cat conftestval`
 else
@@ -1728,7 +1735,7 @@ EOF
 
 
 echo $ac_n "checking size of unsigned int""... $ac_c" 1>&6
-echo "configure:1732: checking size of unsigned int" >&5
+echo "configure:1739: checking size of unsigned int" >&5
 if eval "test \"`echo '$''{'ac_cv_sizeof_unsigned_int'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1736,7 +1743,7 @@ else
     { echo "configure: error: can not run test program while cross compiling" 1>&2; exit 1; }
 else
   cat > conftest.$ac_ext <<EOF
-#line 1740 "configure"
+#line 1747 "configure"
 #include "confdefs.h"
 #include <stdio.h>
 main()
@@ -1747,7 +1754,7 @@ main()
   exit(0);
 }
 EOF
-if { (eval echo configure:1751: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
+if { (eval echo configure:1758: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
 then
   ac_cv_sizeof_unsigned_int=`cat conftestval`
 else
@@ -1767,7 +1774,7 @@ EOF
 
 
 echo $ac_n "checking size of unsigned long""... $ac_c" 1>&6
-echo "configure:1771: checking size of unsigned long" >&5
+echo "configure:1778: checking size of unsigned long" >&5
 if eval "test \"`echo '$''{'ac_cv_sizeof_unsigned_long'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1775,7 +1782,7 @@ else
     { echo "configure: error: can not run test program while cross compiling" 1>&2; exit 1; }
 else
   cat > conftest.$ac_ext <<EOF
-#line 1779 "configure"
+#line 1786 "configure"
 #include "confdefs.h"
 #include <stdio.h>
 main()
@@ -1786,7 +1793,7 @@ main()
   exit(0);
 }
 EOF
-if { (eval echo configure:1790: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
+if { (eval echo configure:1797: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
 then
   ac_cv_sizeof_unsigned_long=`cat conftestval`
 else
@@ -1809,7 +1816,7 @@ EOF
 # Extract the first word of "pppd", so it can be a program name with args.
 set dummy pppd; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:1813: checking for $ac_word" >&5
+echo "configure:1820: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_PPPD'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1846,7 +1853,7 @@ fi
 # Extract the first word of "setsid", so it can be a program name with args.
 set dummy setsid; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:1850: checking for $ac_word" >&5
+echo "configure:1857: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_SETSID'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1883,7 +1890,7 @@ fi
 # Extract the first word of "id", so it can be a program name with args.
 set dummy id; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:1887: checking for $ac_word" >&5
+echo "configure:1894: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_ID'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1917,7 +1924,8 @@ else
 fi
 
 
-$ECHO -n "checking for Linux 2.4.X kernel-mode PPPoE support..."
+echo $ac_n "checking for Linux 2.4.X kernel-mode PPPoE support""... $ac_c" 1>&6
+echo "configure:1929: checking for Linux 2.4.X kernel-mode PPPoE support" >&5
 if test "`uname -s`" = "Linux" ; then
 modprobe ppp_generic > /dev/null 2>&1
 modprobe ppp_async > /dev/null 2>&1
@@ -1928,7 +1936,7 @@ if test "$cross_compiling" = yes; then
     { echo "configure: error: can not run test program while cross compiling" 1>&2; exit 1; }
 else
   cat > conftest.$ac_ext <<EOF
-#line 1932 "configure"
+#line 1940 "configure"
 #include "confdefs.h"
 #include <sys/socket.h>
 #include <net/ethernet.h>
@@ -1940,7 +1948,7 @@ int main()
 }
 
 EOF
-if { (eval echo configure:1944: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
+if { (eval echo configure:1952: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
 then
   ac_cv_linux_kernel_pppoe=yes
 else
@@ -1957,11 +1965,11 @@ else
 fi
 
 $ECHO $ac_cv_linux_kernel_pppoe
-if test "$ac_cv_linux_kernel_pppoe" = yes ; then
-    cat >> confdefs.h <<\EOF
-#define HAVE_LINUX_KERNEL_PPPOE 1
-EOF
-
+if test "$ac_cv_linux_kernel_pppoe" != yes ; then
+   if test "$LINUX_KERNELMODE_PLUGIN" = rp-pppoe.so; then
+      echo "*** Your kernel does not appear to have built-in PPPoE support,"
+      echo "*** but I will build the kernel-mode plugin anyway."
+   fi
 fi
 
 if test "$GCC" = yes; then
@@ -2008,12 +2016,13 @@ case "$PPPD_VERSION" in
 	;;
 esac
 
-$ECHO -n "checking packing order of bit fields... "
+echo $ac_n "checking packing order of bit fields""... $ac_c" 1>&6
+echo "configure:2021: checking packing order of bit fields" >&5
 if test "$cross_compiling" = yes; then
     { echo "configure: error: can not run test program while cross compiling" 1>&2; exit 1; }
 else
   cat > conftest.$ac_ext <<EOF
-#line 2017 "configure"
+#line 2026 "configure"
 #include "confdefs.h"
 
 union foo {
@@ -2039,7 +2048,7 @@ main(void)
     }
 }
 EOF
-if { (eval echo configure:2043: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
+if { (eval echo configure:2052: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
 then
   PACK=normal
 else
@@ -2089,15 +2098,39 @@ fi
 # plugin is built only if we have kernel support
 if test -n "$LINUX_KERNELMODE_PLUGIN" ; then
 	TARGETS="$TARGETS $LINUX_KERNELMODE_PLUGIN"
+	mkdir plugin > /dev/null 2>&1
 fi
 
 EXTRACONFIGS=""
 # Licensed stuff only for commercial distro (for now)
 if test -n "$LIC_DEFINE" ; then
 	TARGETS="licensed-only $TARGETS"
-	EXTRACONFIGS="licensed-only/Makefile"
+	EXTRACONFIGS="$EXTRACONFIGS licensed-only/Makefile"
 fi
 
+RDYNAMIC=""
+# L2TP is only in commercial distro (for now)
+if test -n "$LIC_DEFINE" ; then
+	TARGETS="l2tp $TARGETS"
+	EXTRACONFIGS="$EXTRACONFIGS l2tp/Makefile l2tp/handlers/Makefile"
+	LIC_DEFINE="$LIC_DEFINE -DHAVE_L2TP=1"
+	LIC_LIB="$LIC_LIB -Ll2tp -ll2tp"
+	PPPOE_SERVER_DEPS="$PPPOE_SERVER_DEPS l2tp/libl2tp.a"
+	RDYNAMIC="-rdynamic"
+fi
+
+LIBEVENT=../libevent
+
+
+
+
+
+
+
+
+
+
+datadir_evaluated=`eval echo $datadir`
 
 
 trap '' 1 2 15
@@ -2201,7 +2234,7 @@ done
 ac_given_srcdir=$srcdir
 ac_given_INSTALL="$INSTALL"
 
-trap 'rm -fr `echo "Makefile ../scripts/adsl-connect ../scripts/adsl-start ../scripts/adsl-stop ../scripts/adsl-init ../scripts/adsl-init-suse ../scripts/adsl-init-turbolinux ../scripts/adsl-setup ../gui/Makefile ../gui/tkpppoe $EXTRACONFIGS config.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
+trap 'rm -fr `echo "Makefile libevent/Makefile ../scripts/adsl-connect ../scripts/adsl-start ../scripts/adsl-stop ../scripts/adsl-init ../scripts/adsl-init-suse ../scripts/adsl-init-turbolinux ../scripts/adsl-setup ../gui/Makefile ../gui/tkpppoe $EXTRACONFIGS config.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
 EOF
 cat >> $CONFIG_STATUS <<EOF
 
@@ -2238,11 +2271,6 @@ s%@RANLIB@%$RANLIB%g
 s%@CPP@%$CPP%g
 s%@ECHO@%$ECHO%g
 s%@PPPD_H@%$PPPD_H%g
-s%@LIC_INCDIR@%$LIC_INCDIR%g
-s%@LIC_LIBDIR@%$LIC_LIBDIR%g
-s%@LIC_LIB@%$LIC_LIB%g
-s%@LIC_DEFINE@%$LIC_DEFINE%g
-s%@PPPOE_SERVER_DEPS@%$PPPOE_SERVER_DEPS%g
 s%@LINUX_KERNELMODE_PLUGIN@%$LINUX_KERNELMODE_PLUGIN%g
 s%@PPPD_INCDIR@%$PPPD_INCDIR%g
 s%@PPPOE_RELAY@%$PPPOE_RELAY%g
@@ -2255,6 +2283,15 @@ s%@SETSID@%$SETSID%g
 s%@ID@%$ID%g
 s%@WRAPPER@%$WRAPPER%g
 s%@TARGETS@%$TARGETS%g
+s%@LIC_INCDIR@%$LIC_INCDIR%g
+s%@LIC_LIBDIR@%$LIC_LIBDIR%g
+s%@LIC_LIB@%$LIC_LIB%g
+s%@LIC_MAKEFILE_INCLUDE@%$LIC_MAKEFILE_INCLUDE%g
+s%@LIC_DEFINE@%$LIC_DEFINE%g
+s%@PPPOE_SERVER_DEPS@%$PPPOE_SERVER_DEPS%g
+s%@RDYNAMIC@%$RDYNAMIC%g
+s%@LIBEVENT@%$LIBEVENT%g
+s%@datadir_evaluated@%$datadir_evaluated%g
 
 CEOF
 EOF
@@ -2296,7 +2333,7 @@ EOF
 
 cat >> $CONFIG_STATUS <<EOF
 
-CONFIG_FILES=\${CONFIG_FILES-"Makefile ../scripts/adsl-connect ../scripts/adsl-start ../scripts/adsl-stop ../scripts/adsl-init ../scripts/adsl-init-suse ../scripts/adsl-init-turbolinux ../scripts/adsl-setup ../gui/Makefile ../gui/tkpppoe $EXTRACONFIGS"}
+CONFIG_FILES=\${CONFIG_FILES-"Makefile libevent/Makefile ../scripts/adsl-connect ../scripts/adsl-start ../scripts/adsl-stop ../scripts/adsl-init ../scripts/adsl-init-suse ../scripts/adsl-init-turbolinux ../scripts/adsl-setup ../gui/Makefile ../gui/tkpppoe $EXTRACONFIGS"}
 EOF
 cat >> $CONFIG_STATUS <<\EOF
 for ac_file in .. $CONFIG_FILES; do if test "x$ac_file" != x..; then

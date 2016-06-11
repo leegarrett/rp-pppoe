@@ -11,10 +11,12 @@
 * This program may be distributed according to the terms of the GNU
 * General Public License, version 2 or (at your option) any later version.
 *
+* LIC: GPL
+*
 ***********************************************************************/
 
 static char const RCSID[] =
-"$Id: debug.c,v 1.3 2001/03/22 02:32:48 dfs Exp $";
+"$Id: debug.c,v 1.5 2002/05/31 14:28:18 dfs Exp $";
 
 #include "pppoe.h"
 #include <sys/time.h>
@@ -116,6 +118,8 @@ dumpPacket(FILE *fp, PPPoEPacket *packet, char const *dir)
     case CODE_PADR: fprintf(fp, "PADR "); break;
     case CODE_PADS: fprintf(fp, "PADS "); break;
     case CODE_PADT: fprintf(fp, "PADT "); break;
+    case CODE_PADM: fprintf(fp, "PADM "); break;
+    case CODE_PADN: fprintf(fp, "PADN "); break;
     case CODE_SESS: fprintf(fp, "SESS "); break;
     }
 

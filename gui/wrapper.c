@@ -8,10 +8,14 @@
 *
 * Copyright (C) 2001 by Roaring Penguin Software Inc.
 *
+* LIC: GPL
+*
+* This program may be distributed under the terms of the GNU General
+* Public License, Version 2, or (at your option) any later version.
 ***********************************************************************/
 
 static char const RCSID[] =
-"$Id: wrapper.c,v 1.8 2001/03/04 20:05:17 dfs Exp $";
+"$Id: wrapper.c,v 1.9 2002/04/09 17:28:38 dfs Exp $";
 
 #define _SVID_SOURCE 1 /* For putenv */
 #define _POSIX_SOURCE 1 /* For fileno */

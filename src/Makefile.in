@@ -10,13 +10,15 @@
 # This program may be distributed according to the terms of the GNU
 # General Public License, version 2 or (at your option) any later version.
 #
-# $Id: Makefile.in,v 1.62 2001/09/14 19:18:43 dfs Exp $
+# LIC: GPL
+#
+# $Id: Makefile.in,v 1.84 2002/07/05 19:32:50 dfs Exp $
 #***********************************************************************
 
 # Version is set ONLY IN THE MAKEFILE!  Don't delete this!
-VERSION=3.3
+VERSION=3.5
 
-DEFINES= 
+DEFINES=
 prefix=@prefix@
 exec_prefix=@exec_prefix@
 mandir=@mandir@
@@ -42,6 +44,9 @@ PPPOE_RELAY=@PPPOE_RELAY@
 PPPOE_PATH=$(sbindir)/pppoe
 PPPD_PATH=@PPPD@
 
+# Include ServPoET version if we're building for ServPoET
+@LIC_MAKEFILE_INCLUDE@
+
 # Kernel-mode plugin gets installed here.
 PLUGIN_DIR=/etc/ppp/plugins
 PLUGIN_PATH=$(PLUGIN_DIR)/rp-pppoe.so
@@ -53,7 +58,7 @@ PATHS='-DPPPOE_PATH="$(PPPOE_PATH)"' '-DPPPD_PATH="$(PPPD_PATH)"' \
 	'-DPLUGIN_PATH="$(PLUGIN_PATH)"' \
 	'-DPPPOE_SERVER_OPTIONS="$(PPPOESERVER_PPPD_OPTIONS)"'
 
-CFLAGS= @CFLAGS@ $(LIC_INCDIR) $(DEFINES) $(LIC_DEFINE) $(PATHS)
+CFLAGS= @CFLAGS@ $(LIC_INCDIR) $(DEFINES) $(LIC_DEFINE) $(PATHS) -Ilibevent
 TARGETS=@TARGETS@
 PPPOE_SERVER_LIBS=$(LIC_LIBDIR) $(LIC_LIB)
 
@@ -64,8 +69,8 @@ all: $(TARGETS)
 pppoe-sniff: pppoe-sniff.o if.o common.o debug.o
 	@CC@ -o pppoe-sniff pppoe-sniff.o if.o common.o debug.o
 
-pppoe-server: pppoe-server.o if.o debug.o common.o md5.o @PPPOE_SERVER_DEPS@
-	@CC@ -o pppoe-server pppoe-server.o if.o debug.o common.o md5.o $(PPPOE_SERVER_LIBS)
+pppoe-server: pppoe-server.o if.o debug.o common.o md5.o libevent/libevent.a @PPPOE_SERVER_DEPS@
+	@CC@ -o pppoe-server @RDYNAMIC@ pppoe-server.o if.o debug.o common.o md5.o $(PPPOE_SERVER_LIBS) -Llibevent -levent
 
 pppoe: pppoe.o if.o debug.o common.o ppp.o discovery.o
 	@CC@ -o pppoe pppoe.o if.o debug.o common.o ppp.o discovery.o
@@ -85,7 +90,7 @@ ppp.o: ppp.c pppoe.h
 md5.o: md5.c md5.h
 	@CC@ $(CFLAGS) '-DVERSION="$(VERSION)"' -c -o md5.o md5.c
 
-pppoe-server.o: pppoe-server.c pppoe.h
+pppoe-server.o: pppoe-server.c pppoe.h @PPPOE_SERVER_DEPS@
 	@CC@ $(CFLAGS) '-DVERSION="$(VERSION)"' -c -o pppoe-server.o pppoe-server.c
 
 pppoe-sniff.o: pppoe-sniff.c pppoe.h
@@ -93,6 +98,9 @@ pppoe-sniff.o: pppoe-sniff.c pppoe.h
 
 if.o: if.c pppoe.h
 	@CC@ $(CFLAGS) '-DVERSION="$(VERSION)"' -c -o if.o if.c
+
+libevent/libevent.a:
+	cd libevent && $(MAKE)
 
 common.o: common.c pppoe.h
 	@CC@ $(CFLAGS) '-DVERSION="$(VERSION)"' -c -o common.o common.c
@@ -191,47 +199,71 @@ install: all
 		mkdir -p $(RPM_INSTALL_ROOT)/etc/rc.d/init.d ;\
 		$(install) -m 755 ../scripts/adsl-init-suse $(RPM_INSTALL_ROOT)/etc/rc.d/init.d/adsl ; \
 	fi
+
+	# L2TP
+	@if [ -f l2tp/handlers/sync-pppd.so ] ; then \
+		mkdir -p $(RPM_INSTALL_ROOT)/usr/lib/l2tp/plugins ; \
+		$(install) -m 755 l2tp/handlers/sync-pppd.so $(RPM_INSTALL_ROOT)/usr/lib/l2tp/plugins ; \
+		mkdir -p $(RPM_INSTALL_ROOT)/etc/l2tp ; \
+		$(install) -m 600 l2tp/l2tp.conf $(RPM_INSTALL_ROOT)/etc/l2tp/l2tp.conf.example ; \
+	fi
 	@echo ""
 	@echo "Type 'adsl-setup' to configure the software."
 
+servpoet-tgz: distro-servpoet
+	cd .. && tar cvf servpoet-$(VERSION)$(BETA).tar servpoet-$(VERSION)$(BETA)
+	gzip -f -v -9 ../servpoet-$(VERSION)$(BETA).tar
+	rm -rf ../servpoet-$(VERSION)$(BETA)
+
+tgz: distro
+	cd .. && tar cvf rp-pppoe-$(VERSION)$(BETA).tar rp-pppoe-$(VERSION)$(BETA)
+	gzip -f -v -9 ../rp-pppoe-$(VERSION)$(BETA).tar
+	rm -rf ../rp-pppoe-$(VERSION)$(BETA)
+
+distro-servpoet: distro
+	cp ../servpoet.spec ../rp-pppoe-$(VERSION)$(BETA)
+	$(MAKE) -C licensed-only distro VERSION=$(VERSION) BETA=$(BETA)
+	mv ../rp-pppoe-$(VERSION)$(BETA) ../servpoet-$(VERSION)$(BETA)
+
 distro:
-	cd ..; \
-	rm -rf rp-pppoe-$(VERSION)$(BETA) ; \
-	mkdir rp-pppoe-$(VERSION)$(BETA) || exit 1; \
+	rm -rf ../rp-pppoe-$(VERSION)$(BETA)
+	mkdir ../rp-pppoe-$(VERSION)$(BETA)
 	for i in README SERVPOET go go-gui rp-pppoe.spec ; do \
-		cp $$i rp-pppoe-$(VERSION)$(BETA) || exit 1; \
-	done ; \
-	mkdir rp-pppoe-$(VERSION)$(BETA)/gui || exit 1; \
-	for i in Makefile.in tkpppoe.in wrapper.c tkpppoe.1 pppoe-wrapper.1 ; do \
-		cp gui/$$i rp-pppoe-$(VERSION)$(BETA)/gui || exit 1; \
-	done; \
-	mkdir rp-pppoe-$(VERSION)$(BETA)/gui/html || exit 1; \
+		cp ../$$i ../rp-pppoe-$(VERSION)$(BETA) || exit 1; \
+	done
+	mkdir ../rp-pppoe-$(VERSION)$(BETA)/gui
+	for i in en.msg ja.msg Makefile.in tkpppoe.in wrapper.c tkpppoe.1 pppoe-wrapper.1 ; do \
+		cp ../gui/$$i ../rp-pppoe-$(VERSION)$(BETA)/gui || exit 1; \
+	done
+	mkdir ../rp-pppoe-$(VERSION)$(BETA)/gui/html
 	for i in mainwin-busy.png mainwin-nonroot.png mainwin.png props-advanced.png props-basic.png props-nic.png props-options.png tkpppoe.html ; do \
-		cp gui/html/$$i rp-pppoe-$(VERSION)$(BETA)/gui/html || exit 1; \
-	done; \
-	mkdir rp-pppoe-$(VERSION)$(BETA)/configs || exit 1; \
+		cp ../gui/html/$$i ../rp-pppoe-$(VERSION)$(BETA)/gui/html || exit 1; \
+	done
+	mkdir ../rp-pppoe-$(VERSION)$(BETA)/configs
 	for i in firewall-masq firewall-standalone pap-secrets pppoe-server-options pppoe.conf ; do \
-		cp configs/$$i rp-pppoe-$(VERSION)$(BETA)/configs || exit 1; \
-	done ; \
-	mkdir rp-pppoe-$(VERSION)$(BETA)/doc || exit 1; \
+		cp ../configs/$$i ../rp-pppoe-$(VERSION)$(BETA)/configs || exit 1; \
+	done
+	mkdir ../rp-pppoe-$(VERSION)$(BETA)/doc
 	for i in CHANGES KERNEL-MODE-PPPOE HOW-TO-CONNECT LICENSE PROBLEMS ; do \
-		cp doc/$$i rp-pppoe-$(VERSION)$(BETA)/doc || exit 1; \
-	done; \
-	mkdir rp-pppoe-$(VERSION)$(BETA)/man || exit 1; \
+		cp ../doc/$$i ../rp-pppoe-$(VERSION)$(BETA)/doc || exit 1; \
+	done
+	mkdir ../rp-pppoe-$(VERSION)$(BETA)/man
 	for i in adsl-connect.8 adsl-setup.8 adsl-start.8 adsl-status.8 adsl-stop.8 pppoe-server.8 pppoe-sniff.8 pppoe.8 pppoe-relay.8 pppoe.conf.5 ; do \
-		cp man/$$i rp-pppoe-$(VERSION)$(BETA)/man || exit 1; \
-	done; \
-	mkdir rp-pppoe-$(VERSION)$(BETA)/scripts || exit 1; \
+		cp ../man/$$i ../rp-pppoe-$(VERSION)$(BETA)/man || exit 1; \
+	done
+	mkdir ../rp-pppoe-$(VERSION)$(BETA)/scripts
 	for i in adsl-connect.in adsl-init-suse.in adsl-init-turbolinux.in adsl-init.in adsl-setup.in adsl-start.in adsl-stop.in adsl-status ; do \
-		cp scripts/$$i rp-pppoe-$(VERSION)$(BETA)/scripts || exit 1; \
-	done; \
-	mkdir rp-pppoe-$(VERSION)$(BETA)/src || exit 1; \
+		cp ../scripts/$$i ../rp-pppoe-$(VERSION)$(BETA)/scripts || exit 1; \
+	done
+	mkdir ../rp-pppoe-$(VERSION)$(BETA)/src
 	for i in Makefile.in install-sh common.c config.h.in configure configure.in debug.c discovery.c if.c md5.c md5.h ppp.c pppoe-server.c pppoe-sniff.c pppoe.c pppoe.h pppoe-server.h plugin.c relay.c relay.h ; do \
-		cp src/$$i rp-pppoe-$(VERSION)$(BETA)/src || exit 1; \
-	done; \
-	mkdir rp-pppoe-$(VERSION)$(BETA)/src/plugin || exit 1; \
-	tar cvf rp-pppoe-$(VERSION)$(BETA).tar rp-pppoe-$(VERSION)$(BETA)/* ; \
-	gzip -f -v -9 rp-pppoe-$(VERSION)$(BETA).tar ; \
+		cp ../src/$$i ../rp-pppoe-$(VERSION)$(BETA)/src || exit 1; \
+	done
+	mkdir ../rp-pppoe-$(VERSION)$(BETA)/src/libevent
+	for i in Makefile.in event.c event.h event_tcp.c event_tcp.h eventpriv.h hash.c hash.h event_sig.c ; do \
+		cp ../src/libevent/$$i ../rp-pppoe-$(VERSION)$(BETA)/src/libevent || exit 1; \
+	done
+	mkdir ../rp-pppoe-$(VERSION)$(BETA)/src/plugin
 
 distro-beta: beta-check
 	$(MAKE) distro BETA=-BETA-$(BETA)
@@ -242,7 +274,7 @@ beta-check:
 		exit 1; \
 	fi
 
-rpms: distro
+rpms: tgz
 	cp ../rp-pppoe-$(VERSION).tar.gz /usr/src/redhat/SOURCES
 	gpg --detach-sign /usr/src/redhat/SOURCES/rp-pppoe-$(VERSION).tar.gz
 	cd ..; \
@@ -251,23 +283,36 @@ rpms: distro
 		/usr/src/redhat/RPMS/i386/rp-pppoe-$(VERSION)-1.i386.rpm \
 		/usr/src/redhat/RPMS/i386/rp-pppoe-gui-$(VERSION)-1.i386.rpm
 
+servpoet-rpms: servpoet-tgz
+	cp ../servpoet-$(VERSION).tar.gz /usr/src/redhat/SOURCES
+	cd .. && rpm -ba servpoet.spec
+
 clean:
 	rm -f *.o pppoe pppoe-sniff pppoe-server core rp-pppoe.so plugin/*.o plugin/libplugin.a *~
+	test -f licensed-only/Makefile && $(MAKE) -C licensed-only clean || true
+	test -f libevent/Makefile && $(MAKE) -C libevent clean || true
+	test -f l2tp/Makefile && $(MAKE) -C l2tp clean || true
 
 distclean: clean
 	rm -f Makefile config.h config.cache config.log config.status
+	rm -f libevent/Makefile
 	rm -f ../scripts/adsl-connect ../scripts/adsl-start ../scripts/adsl-stop ../scripts/adsl-init ../scripts/adsl-setup ../scripts/adsl-init-suse ../scripts/adsl-init-turbolinux
 
 update-version:
 	sed -e 's/^Version: .*$$/Version: $(VERSION)/' ../rp-pppoe.spec > ../rp-pppoe.spec.new && mv ../rp-pppoe.spec.new ../rp-pppoe.spec
 	sed -e 's+^Source: .*$$+Source: http://www.roaringpenguin.com/pppoe/rp-pppoe-$(VERSION).tar.gz+' ../rp-pppoe.spec > ../rp-pppoe.spec.new && mv ../rp-pppoe.spec.new ../rp-pppoe.spec
+	test -f ../servpoet.spec && sed -e 's/^Version: .*$$/Version: $(VERSION)/' ../servpoet.spec > ../servpoet.spec.new && mv ../servpoet.spec.new ../servpoet.spec || true
+	test -f ../servpoet.spec && sed -e 's+^Source: .*$$+Source: http://www.roaringpenguin.com/pppoe/servpoet-$(VERSION).tar.gz+' ../servpoet.spec > ../servpoet.spec.new && mv ../servpoet.spec.new ../servpoet.spec || true
 
 # Convenience target for David!  Don't try to use this one.
 km:
 	./configure --enable-plugin=/home/dfs/Archive/PPP/ppp-2.4.0.pppoe4-patched-dfs
 
 licensed-only:
-	$(MAKE) -C licensed-only all
+	$(MAKE) -C licensed-only all VERSION=$(VERSION) SERVPOET_VERSION=$(SERVPOET_VERSION)
+
+l2tp: libevent/libevent.a
+	$(MAKE) -C l2tp all
 
 .PHONY: update-version
 
@@ -278,3 +323,7 @@ licensed-only:
 .PHONY: rpms
 
 .PHONY: licensed-only
+
+.PHONY: distro
+
+.PHONY: l2tp

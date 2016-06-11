@@ -1,6 +1,6 @@
 /***********************************************************************
 *
-* pppoe.c 
+* pppoe.c
 *
 * Implementation of user-space PPPoE redirector for Linux.
 *
@@ -9,10 +9,12 @@
 * This program may be distributed according to the terms of the GNU
 * General Public License, version 2 or (at your option) any later version.
 *
+* LIC: GPL
+*
 ***********************************************************************/
 
 static char const RCSID[] =
-"$Id: pppoe.c,v 1.27 2001/09/03 20:09:19 dfs Exp $";
+"$Id: pppoe.c,v 1.35 2002/05/08 13:43:06 dfs Exp $";
 
 #include "pppoe.h"
 
@@ -86,6 +88,10 @@ sendSessionPacket(PPPoEConnection *conn, PPPoEPacket *packet, int len)
 	clampMSS(packet, "outgoing", optClampMSS);
     }
     if (sendPacket(conn, conn->sessionSocket, packet, len + HDR_SIZE) < 0) {
+	if (errno == ENOBUFS) {
+	    /* No buffer space is a transient error */
+	    return;
+	}
 	exit(EXIT_FAILURE);
     }
     if (conn->debugFile) {
@@ -134,8 +140,10 @@ sessionDiscoveryPacket(PPPoEPacket *packet)
     }
 
     syslog(LOG_INFO,
-	   "Session terminated -- received PADT from peer");
+	   "Session %d terminated -- received PADT from peer",
+	   (int) ntohs(packet->session));
     parsePacket(packet, parseLogErrs, NULL);
+    sendPADT(Connection, "Received PADT from peer");
     exit(EXIT_SUCCESS);
 }
 #else
@@ -192,8 +200,10 @@ sessionDiscoveryPacket(PPPoEConnection *conn)
     }
 
     syslog(LOG_INFO,
-	   "Session terminated -- received PADT from peer");
+	   "Session %d terminated -- received PADT from peer",
+	   (int) ntohs(packet.session));
     parsePacket(&packet, parseLogErrs, NULL);
+    sendPADT(conn, "Received PADT from peer");
     exit(EXIT_SUCCESS);
 }
 #endif /* USE_BPF */
@@ -267,7 +277,8 @@ session(PPPoEConnection *conn)
 	    fatalSys("select (session)");
 	}
 	if (r == 0) { /* Inactivity timeout */
-	    syslog(LOG_ERR, "Inactivity timeout... something wicked happened");
+	    syslog(LOG_ERR, "Inactivity timeout... something wicked happened on session %d",
+		   (int) ntohs(conn->session));
 	    sendPADT(conn, "RP-PPPoE: Inactivity timeout");
 	    exit(EXIT_FAILURE);
 	}
@@ -291,7 +302,7 @@ session(PPPoEConnection *conn)
 	    } while (BPF_BUFFER_HAS_DATA);
 	}
 
-#ifndef USE_BPF	
+#ifndef USE_BPF
 	/* BSD uses a single socket, see *syncReadFromEth() */
 	/* for calls to sessionDiscoveryPacket() */
 	if (conn->discoverySocket >= 0) {
@@ -318,8 +329,9 @@ session(PPPoEConnection *conn)
 void
 sigPADT(int src)
 {
-  syslog(LOG_DEBUG,"Received signal %d.",(int)src);
-  sendPADT(Connection, "RP-PPPoE: Received signal");
+  syslog(LOG_DEBUG,"Received signal %d on session %d.",
+	 (int)src, (int) ntohs(Connection->session));
+  sendPADTf(Connection, "RP-PPPoE: Received signal %d", src);
   exit(EXIT_SUCCESS);
 }
 
@@ -434,7 +446,7 @@ main(int argc, char *argv[])
 	    break;
 
 	case 'n':
-	    /* Do not even open a discovery socket -- used when invoked 
+	    /* Do not even open a discovery socket -- used when invoked
 	       by pppoe-server */
 	    conn.noDiscoverySocket = 1;
 	    break;
@@ -460,7 +472,7 @@ main(int argc, char *argv[])
 	    /* Skip discovery phase! */
 	    conn.skipDiscovery = 1;
 	    break;
-		       
+
 	case 'p':
 	    pidfile = fopen(optarg, "w");
 	    if (pidfile) {
@@ -534,16 +546,17 @@ main(int argc, char *argv[])
 #endif
     }
 
-    /* Set signal handlers: send PADT on TERM, HUP and INT */
+    /* Set signal handlers: send PADT on HUP; ignore TERM and INT */
     if (!conn.printACNames) {
-	signal(SIGTERM, sigPADT);
+	signal(SIGTERM, SIG_IGN);
+	signal(SIGINT, SIG_IGN);
 	signal(SIGHUP, sigPADT);
-	signal(SIGINT, sigPADT);
 
 #ifdef HAVE_N_HDLC
 	if (conn.synchronous) {
 	    if (ioctl(0, TIOCSETD, &disc) < 0) {
-		printErr("Unable to set line discipline to N_HDLC -- synchronous mode probably will fail");
+		printErr("Unable to set line discipline to N_HDLC.  Make sure your kernel supports the N_HDLC line discipline, or do not use the SYNCHRONOUS option.  Quitting.");
+		exit(EXIT_FAILURE);
 	    } else {
 		syslog(LOG_INFO,
 		       "Changed pty line discipline to N_HDLC for synchronous mode");
@@ -604,9 +617,11 @@ void
 fatalSys(char const *str)
 {
     char buf[1024];
-    sprintf(buf, "%.256s: %.256s", str, strerror(errno));
+    sprintf(buf, "%.256s: Session %d: %.256s",
+	    str, (int) ntohs(Connection->session), strerror(errno));
     printErr(buf);
-    sendPADT(Connection, "RP-PPPoE: System call error");
+    sendPADTf(Connection, "RP-PPPoE: System call error: %s",
+	      strerror(errno));
     exit(EXIT_FAILURE);
 }
 
@@ -639,10 +654,9 @@ sysErr(char const *str)
 void
 rp_fatal(char const *str)
 {
-    char buf[1024];
     printErr(str);
-    sprintf(buf, "RP-PPPoE: %.256s", str);
-    sendPADT(Connection, buf);
+    sendPADTf(Connection, "RP-PPPoE: Session %d: %.256s",
+	      (int) ntohs(Connection->session), str);
     exit(EXIT_FAILURE);
 }
 
@@ -880,4 +894,3 @@ syncReadFromEth(PPPoEConnection *conn, int sock, int clampMss)
 	fatalSys("syncReadFromEth: write");
     }
 }
-
