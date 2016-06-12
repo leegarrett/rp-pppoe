@@ -8,7 +8,7 @@
 #
 # Copyright (C) 2000 Roaring Penguin Software Inc.
 #
-# $Id: pppoe-connect.in,v 1.3 2005/08/29 12:16:37 dfs Exp $
+# $Id$
 #
 # This file may be distributed under the terms of the GNU General
 # Public License.
@@ -201,9 +201,6 @@ if test "$LINUX_PLUGIN" != "" ; then
     if test -n "$SERVICENAME" ; then
 	PLUGIN_OPTS="$PLUGIN_OPTS rp_pppoe_service $SERVICENAME"
     fi
-
-    # Interface name MUST BE LAST!!
-    PLUGIN_OPTS="$PLUGIN_OPTS $ETH"
     modprobe pppoe > /dev/null 2>&1
 fi
 

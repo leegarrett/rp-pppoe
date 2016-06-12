@@ -8,7 +8,7 @@
 #
 # Copyright (C) 2000 Roaring Penguin Software Inc.
 #
-# $Id: go,v 1.5 2005/08/09 02:49:09 dfs Exp $
+# $Id$
 #***********************************************************************
 
 # Figure out directory of script

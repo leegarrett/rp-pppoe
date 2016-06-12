@@ -1,6 +1,5 @@
-.\" $Id: pppoe-server.8,v 1.11 2005/11/16 16:35:39 dfs Exp $ 
 .\" LIC: GPL
-.TH PPPOE-SERVER 8 "3 July 2000"
+.TH PPPOE-SERVER 8 "21 June 2008"
 .\""
 .UC 4
 .SH NAME
@@ -50,6 +49,13 @@ requests a Service-Name of length zero.
 .B \-m \fIMSS\fR
 This option is passed directly to \fBpppoe\fR; see \fBpppoe\fR(8) for
 details.  If you are using kernel-mode PPPoE, this option has \fIno effect\fR.
+
+.TP
+.B \-x \fIn\fR
+Limit the number of sessions per peer MAC address to \fIn\fR.  If a given
+MAC address attempts to create more than \fIn\fR sessions, then its
+PADI and PADR packets are ignored.  If you set \fIn\fR to 0 (the default),
+then no limit is imposed on the number of sessions per peer MAC address.
 
 .TP
 .B \-s

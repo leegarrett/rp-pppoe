@@ -14,9 +14,6 @@
 * Public License, Version 2, or (at your option) any later version.
 ***********************************************************************/
 
-static char const RCSID[] =
-"$Id: wrapper.c,v 1.10 2005/08/09 02:49:15 dfs Exp $";
-
 #define _SVID_SOURCE 1 /* For putenv */
 #define _POSIX_SOURCE 1 /* For fileno */
 #define _BSD_SOURCE 1 /* For setreuid */
@@ -146,7 +143,7 @@ main(int argc, char *argv[])
 
     /* Clean out environment */
     CleanEnvironment(environ);
-    
+
     /* Are we root? */
     amRoot = (getuid() == 0);
 
@@ -221,7 +218,7 @@ main(int argc, char *argv[])
 	perror("setreuid");
 	exit(1);
     }
-       
+
     /* It's OK -- do it.  */
     if (!strcmp(argv[1], "start")) {
 	if (!PathOK(pppoe_start)) exit(1);
