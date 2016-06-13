@@ -1,0 +1,7 @@
+# Shipping with setuid is intentional to allow unprivileged users belonging
+# to the dip group to dial in.
+pppoe binary: setuid-binary usr/sbin/pppoe 4754 root/dip
+
+# This file in not world-readable because it usually contains login credentials
+# from the DSL provider that need to be protected.
+pppoe binary: non-standard-file-perm etc/ppp/peers/dsl-provider 0640 != 0644

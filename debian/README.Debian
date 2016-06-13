@@ -74,7 +74,7 @@ the connection came up successfully.
   route (aka gateway) when you start the connection. If so try deleting this
   route, by removing the corresponding "gateway" line in the 
   /etc/network/interfaces file.
-  You may find useful the replacedefaultroute pppd keywork.
+  You may find useful the replacedefaultroute pppd keyword.
 
 - If the usepeerdns keyword is used in /etc/ppp/peers/dsl-provider,
   once the connection is up the default pppd configuration will

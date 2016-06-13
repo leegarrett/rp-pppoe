@@ -3,7 +3,9 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-build: build-stamp
+build: build-arch build-indep
+build-arch: build-stamp
+build-indep: build-stamp
 build-stamp:
 	dh_testdir
 #	test -f configure || (aclocal; autoconf)
@@ -16,8 +18,8 @@ clean:
 	dh_testroot
 	rm -f build-stamp
 	-rm -f pppoe.prj pppoe.log .pppoe.prcs_aux
-	-$(MAKE) -C src distclean
-	-$(MAKE) -C gui distclean
+	[ ! -f src/Makefile ] || $(MAKE) -C src distclean
+	[ ! -f gui/Makefile ] || $(MAKE) -C gui distclean
 	rm -f src/pppoe-relay
 	-rm -f debian/substvars.debhelper
 	-rm -f config.h config.log config.status
@@ -32,7 +34,7 @@ binary-indep: build
 binary-arch: build
 	dh_testdir
 	dh_testroot
-	dh_clean -k
+	dh_prep
 	dh_installdirs usr/sbin usr/share
 	$(MAKE) -C src install DESTDIR="`pwd`/debian/pppoe"
 #	Now clean out unwanted things, and move others to their places
@@ -54,6 +56,7 @@ binary-arch: build
 	chmod u+s debian/pppoe/usr/sbin/pppoe
 	chmod o-x debian/pppoe/usr/sbin/pppoe
 	dh_installdeb
+	dh_lintian
 	dh_shlibdeps
 	dh_gencontrol
 	dh_md5sums
