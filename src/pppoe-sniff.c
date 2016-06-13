@@ -15,7 +15,7 @@
 ***********************************************************************/
 
 static char const RCSID[] =
-"$Id: pppoe-sniff.c,v 1.8 2004/10/04 15:08:29 dfs Exp $";
+"$Id$";
 
 #include "pppoe.h"
 
@@ -196,7 +196,7 @@ main(int argc, char *argv[])
 	dlokack(sock, (char *)buf);
 #else
 
-    sock = openInterface(IfName, ETH_P_ALL,  NULL);
+	sock = openInterface(IfName, ETH_P_ALL,  NULL, NULL);
 
 #endif
 

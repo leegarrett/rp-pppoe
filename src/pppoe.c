@@ -4,7 +4,7 @@
 *
 * Implementation of user-space PPPoE redirector for Linux.
 *
-* Copyright (C) 2000-2006 by Roaring Penguin Software Inc.
+* Copyright (C) 2000-2015 by Roaring Penguin Software Inc.
 *
 * This program may be distributed according to the terms of the GNU
 * General Public License, version 2 or (at your option) any later version.
@@ -14,7 +14,7 @@
 ***********************************************************************/
 
 static char const RCSID[] =
-"$Id: pppoe.c,v 1.43 2006/02/23 15:40:42 dfs Exp $";
+"$Id$";
 
 #include "pppoe.h"
 
@@ -28,6 +28,7 @@ static char const RCSID[] =
 
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <errno.h>
 
 #ifdef HAVE_SYS_TIME_H
@@ -51,7 +52,7 @@ static char const RCSID[] =
 
 #ifdef HAVE_N_HDLC
 #ifndef N_HDLC
-#include <linux/termios.h>
+#include <pty.h>
 #endif
 #endif
 
@@ -112,7 +113,6 @@ static int set_flag(char *ifname, short flag)
 PPPoEConnection *Connection = NULL; /* Must be global -- used
 				       in signal handler */
 
-int persist = 0; 		/* We are not a pppd plugin */
 /***********************************************************************
 *%FUNCTION: sendSessionPacket
 *%ARGUMENTS:
@@ -274,9 +274,6 @@ session(PPPoEConnection *conn)
     int maxFD = 0;
     int r;
 
-    /* Open a session socket */
-    conn->sessionSocket = openInterface(conn->ifName, Eth_PPPOE_Session, conn->myEth);
-
     /* Drop privileges */
     dropPrivs();
 
@@ -416,6 +413,7 @@ usage(char const *argv0)
 	    "   -S name        -- Set desired service name.\n"
 	    "   -C name        -- Set desired access concentrator name.\n"
 	    "   -U             -- Use Host-Unique to allow multiple PPPoE sessions.\n"
+	    "   -W value       -- Use Host-Unique set to 'value' specifically.\n"
 	    "   -s             -- Use synchronous PPP encapsulation.\n"
 	    "   -m MSS         -- Clamp incoming and outgoing MSS options.\n"
 	    "   -p pidfile     -- Write process-ID to pidfile.\n"
@@ -426,7 +424,7 @@ usage(char const *argv0)
 	    "   -f disc:sess   -- Set Ethernet frame types (hex).\n"
 	    "   -H XX:XX:XX:XX:XX:XX -- Force Hardware Address (hex).\n"
 	    "   -h             -- Print usage information.\n\n"
-	    "PPPoE Version %s, Copyright (C) 2001-2006 Roaring Penguin Software Inc.\n"
+	    "PPPoE Version %s, Copyright (C) 2001-2015 Roaring Penguin Software Inc.\n"
 	    "PPPoE comes with ABSOLUTELY NO WARRANTY.\n"
 	    "This is free software, and you are welcome to redistribute it under the terms\n"
 	    "of the GNU General Public License, version 2 or any later version.\n"
@@ -452,6 +450,7 @@ main(int argc, char *argv[])
     unsigned int s;		/* Temporary to hold session */
     FILE *pidfile;
     unsigned int discoveryType, sessionType;
+    char const *options;
 
     PPPoEConnection conn;
 
@@ -477,11 +476,10 @@ main(int argc, char *argv[])
     /* Initialize syslog */
     openlog("pppoe", LOG_PID, LOG_DAEMON);
 
-    char const *options;
 #ifdef DEBUGGING_ENABLED
-    options = "I:VAT:D:hS:C:Usm:np:e:kdf:F:t:H:";
+    options = "I:VAT:D:hS:C:UW:sm:np:e:kdf:F:t:";
 #else
-    options = "I:VAT:hS:C:Usm:np:e:kdf:F:t:H:";
+    options = "I:VAT:hS:C:UW:sm:np:e:kdf:F:t:";
 #endif
     while((opt = getopt(argc, argv, options)) != -1) {
 	switch(opt) {
@@ -581,7 +579,24 @@ main(int argc, char *argv[])
 	    conn.synchronous = 1;
 	    break;
 	case 'U':
-	    conn.useHostUniq = 1;
+	    if (conn.hostUniq) {
+		fprintf(stderr, "-U and -W are mutually-exclusive and may only be used once.\n");
+		exit(EXIT_FAILURE);
+	    }
+	    /* Allows for a 64-bit PID */
+	    conn.hostUniq = malloc(17);
+	    if (!conn.hostUniq) {
+		fprintf(stderr, "Out of memory.\n");
+		exit(EXIT_FAILURE);
+	    }
+	    sprintf(conn.hostUniq, "%lx", (unsigned long) getpid());
+	    break;
+	case 'W':
+	    if (conn.hostUniq) {
+		fprintf(stderr, "-U and -W are mutually-exclusive and may only be used once.\n");
+		exit(EXIT_FAILURE);
+	    }
+	    SET_STRING(conn.hostUniq, optarg);
 	    break;
 #ifdef DEBUGGING_ENABLED
 	case 'D':
@@ -682,6 +697,8 @@ main(int argc, char *argv[])
 	    if (conn.printACNames) {
 		fprintf(stderr, "Sending discovery flood %d\n", n+1);
 	    }
+            conn.discoverySocket =
+	        openInterface(conn.ifName, Eth_PPPOE_Discovery, conn.myEth, NULL);
 	    discovery(&conn);
 	    conn.discoveryState = STATE_SENT_PADI;
 	    close(conn.discoverySocket);
@@ -689,7 +706,22 @@ main(int argc, char *argv[])
 	exit(EXIT_SUCCESS);
     }
 
-    discovery(&conn);
+    /* Open session socket before discovery phase, to avoid losing session */
+    /* packets sent by peer just after PADS packet (noted on some Cisco    */
+    /* server equipment).                                                  */
+    /* Opening this socket just before waitForPADS in the discovery()      */
+    /* function would be more appropriate, but it would mess-up the code   */
+    if (!optSkipSession)
+        conn.sessionSocket = openInterface(conn.ifName, Eth_PPPOE_Session, conn.myEth, NULL);
+
+    /* Skip discovery and don't open discovery socket? */
+    if (conn.skipDiscovery && conn.noDiscoverySocket) {
+	conn.discoveryState = STATE_SESSION;
+    } else {
+        conn.discoverySocket =
+	    openInterface(conn.ifName, Eth_PPPOE_Discovery, conn.myEth, NULL);
+        discovery(&conn);
+    }
     if (optSkipSession) {
 	printf("%u:%02x:%02x:%02x:%02x:%02x:%02x\n",
 	       ntohs(conn.session),

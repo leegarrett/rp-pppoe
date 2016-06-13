@@ -25,6 +25,7 @@ AC_CHECK_HEADERS(linux/if_pppox.h, [], [],
 #include<sys/socket.h>
 #include<net/ethernet.h>
 #include<linux/if.h>
+#include<linux/in.h>
 ])
 
 dnl Checks for typedefs, structures, and compiler characteristics.
@@ -49,7 +50,9 @@ fi
 
 dnl Check for N_HDLC line discipline
 AC_MSG_CHECKING(for N_HDLC line discipline)
-AC_TRY_COMPILE([#include <linux/termios.h>],
+AC_TRY_COMPILE([
+#include <pty.h>
+],
 	[int x = N_HDLC;],
 	ac_cv_n_hdlc=yes,
 	ac_cv_n_hdlc=no)
@@ -64,13 +67,16 @@ dnl If we were given "--enable-plugin" without a path, take a stab at where
 dnl the pppd source code might be.
 
 if test "$ac_cv_pluginpath" = "yes" ; then
-	AC_PATH_PROG(PPPD_H, pppd/pppd.h, NOTFOUND, "/usr/include:/usr/local/include:$PATH:../../$PPPD_DIR")
-	if test "$PPPD_H" = "NOTFOUND" ; then
-		ac_cv_pluginpath=no
-        else
-		ac_cv_pluginpath=`dirname "$PPPD_H"`
-		ac_cv_pluginpath=`dirname "$ac_cv_pluginpath"`
+    for i in /usr/include /usr/local/include ; do
+	if test -r $i/pppd/pppd.h; then
+	    ac_cv_pluginpath=$i
 	fi
+    done
+fi
+
+if test "$ac_cv_pluginpath" = "yes" ; then
+    echo "*** Could not fined pppd/pppd.h anywhere... not building plugin"
+    ac_cv_pluginpath=no
 fi
 
 AC_ARG_ENABLE(licenses, [  --enable-licenses=lic_path      build commercial version], ac_cv_licpath=$enableval, ac_cv_licpath=no)
@@ -105,12 +111,17 @@ if test "$ac_cv_header_linux_if_pppox_h" = yes ; then
 	fi
 fi
 
+if test "$PPPD_INCDIR" = "" ; then
+   PPPD_INCDIR=/usr/include
+fi
+
 if test "$ac_cv_debugging" = "yes" ; then
    AC_DEFINE(DEBUGGING_ENABLED)
 fi
 
 AC_SUBST(LINUX_KERNELMODE_PLUGIN)
 AC_SUBST(PPPD_INCDIR)
+AC_SUBST(PPPD_H)
 
 dnl Determine whether or not to build PPPoE relay
 PPPOE_RELAY=""
@@ -157,6 +168,7 @@ fi
 AC_TRY_RUN([#include <sys/socket.h>
 #include <net/ethernet.h>
 #include <linux/if.h>
+#include <netinet/in.h>
 #include <linux/if_pppox.h>
 int main()
 {
@@ -180,7 +192,7 @@ fi
 
 dnl GCC warning level
 if test "$GCC" = yes; then
-	CFLAGS="$CFLAGS -Wall -Wstrict-prototypes -ansi"
+	CFLAGS="$CFLAGS -fno-strict-aliasing -Wall -Wstrict-prototypes"
 fi
 
 dnl If we couldn't find pppd, die
@@ -221,6 +233,7 @@ esac
 
 dnl Figure out packing order of structures
 AC_MSG_CHECKING([packing order of bit fields])
+if test "${rpppoe_cv_pack_bitfields+set}" != set ; then
 AC_TRY_RUN([
 union foo {
     struct bar {
@@ -245,6 +258,7 @@ main(void)
     }
 }], rpppoe_cv_pack_bitfields=normal, rpppoe_cv_pack_bitfields=rev,
 $ECHO "no defaults for cross-compiling"; exit 0)
+fi
 
 if test "$rpppoe_cv_pack_bitfields" = "rev" ; then
 	AC_MSG_RESULT(reversed)
@@ -312,6 +326,7 @@ AC_SUBST(PPPOE_SERVER_DEPS)
 AC_SUBST(RDYNAMIC)
 AC_SUBST(LIBEVENT)
 AC_SUBST(ECHO)
+AC_SUBST(LDFLAGS)
 
 datadir_evaluated=`eval echo $datadir`
 AC_SUBST(datadir_evaluated)

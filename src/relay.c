@@ -11,11 +11,11 @@
 *
 * LIC: GPL
 *
-* $Id: relay.c,v 1.28 2006/02/23 15:40:42 dfs Exp $
+* $Id$
 *
 ***********************************************************************/
 static char const RCSID[] =
-"$Id: relay.c,v 1.28 2006/02/23 15:40:42 dfs Exp $";
+"$Id$";
 
 #define _GNU_SOURCE 1 /* For SA_RESTART */
 
@@ -390,8 +390,8 @@ addInterface(char const *ifname,
     strncpy(i->name, ifname, IFNAMSIZ);
     i->name[IFNAMSIZ] = 0;
 
-    i->discoverySock = openInterface(ifname, Eth_PPPOE_Discovery, i->mac);
-    i->sessionSock   = openInterface(ifname, Eth_PPPOE_Session,   NULL);
+    i->discoverySock = openInterface(ifname, Eth_PPPOE_Discovery, i->mac, NULL);
+    i->sessionSock   = openInterface(ifname, Eth_PPPOE_Session,   NULL, NULL);
     i->clientOK = clientOK;
     i->acOK = acOK;
 }
@@ -955,6 +955,11 @@ relayHandlePADT(PPPoEInterface const *iface,
     SessionHash *sh;
     PPPoESession *ses;
 
+    /* Destination address must be interface's MAC address */
+    if (memcmp(packet->ethHdr.h_dest, iface->mac, ETH_ALEN)) {
+	return;
+    }
+
     sh = findSession(packet->ethHdr.h_source, packet->session);
     if (!sh) {
 	return;
@@ -1315,7 +1320,7 @@ relayHandlePADS(PPPoEInterface const *iface,
     PPPoETag tag;
     unsigned char *loc;
     int ifIndex;
-    int acIndex;
+
     PPPoESession *ses = NULL;
     SessionHash *sh;
 
@@ -1332,8 +1337,6 @@ relayHandlePADS(PPPoEInterface const *iface,
 	       iface->name);
 	return;
     }
-
-    acIndex = iface - Interfaces;
 
     /* Source address must be unicast */
     if (NOT_UNICAST(packet->ethHdr.h_source)) {

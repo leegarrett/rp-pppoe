@@ -8,7 +8,7 @@
 #
 # Copyright (C) 2000 Roaring Penguin Software Inc.
 #
-# $Id: pppoe-connect.in,v 1.3 2005/08/29 12:16:37 dfs Exp $
+# $Id$
 #
 # This file may be distributed under the terms of the GNU General
 # Public License.
@@ -115,7 +115,12 @@ fi
 # fails on some *BSD's, so we'll only do it under Linux
 
 if test `uname -s` = Linux ; then
-    $IFCONFIG $ETH up mtu 1500
+    $IFCONFIG $ETH up
+    EXISTING_MTU=`$IFCONFIG $ETH 2> /dev/null | grep MTU: | sed -e 's/.*MTU://' | sed -e 's/[^0-9].*//'`
+    if test "$EXISTING_MTU" = "" -o "$EXISTING_MTU" -lt 1500 ; then
+	$IFCONFIG $ETH mtu 1500
+    fi
+
     # For 2.4 kernels.  Will fail on 2.2.x, but who cares?
     modprobe ppp_generic > /dev/null 2>&1
     modprobe ppp_async > /dev/null 2>&1
@@ -201,9 +206,6 @@ if test "$LINUX_PLUGIN" != "" ; then
     if test -n "$SERVICENAME" ; then
 	PLUGIN_OPTS="$PLUGIN_OPTS rp_pppoe_service $SERVICENAME"
     fi
-
-    # Interface name MUST BE LAST!!
-    PLUGIN_OPTS="$PLUGIN_OPTS $ETH"
     modprobe pppoe > /dev/null 2>&1
 fi
 
@@ -213,8 +215,21 @@ else
     DEFAULTROUTE=""
 fi
 
+if test -n "$UNIT" ; then
+    DOUNIT="unit $UNIT"
+else
+    DOUNIT=""
+fi
+
+if test "$MTU" = "" ; then
+    MTU=1492
+fi
+if test "$MRU" = "" ; then
+    MRU=1492
+fi
+
 # Standard PPP options we always use
-PPP_STD_OPTIONS="$PLUGIN_OPTS noipdefault noauth default-asyncmap $DEFAULTROUTE hide-password nodetach $PEERDNS mtu 1492 mru 1492 noaccomp nodeflate nopcomp novj novjccomp user $USER lcp-echo-interval $LCP_INTERVAL lcp-echo-failure $LCP_FAILURE $PPPD_EXTRA"
+PPP_STD_OPTIONS="$PLUGIN_OPTS $DOUNIT noipdefault noauth default-asyncmap $DEFAULTROUTE hide-password nodetach $PEERDNS mtu $MTU mru $MRU noaccomp nodeflate nopcomp novj novjccomp user $USER lcp-echo-interval $LCP_INTERVAL lcp-echo-failure $LCP_FAILURE $PPPD_EXTRA"
 
 # Jigger DNS if required...
 if test "$DNSTYPE" = "SERVER" ; then

@@ -6,7 +6,7 @@
 *
 * Functions for opening a raw socket and reading/writing raw Ethernet frames.
 *
-* Copyright (C) 2000 by Roaring Penguin Software Inc.
+* Copyright (C) 2000-2012 by Roaring Penguin Software Inc.
 *
 * This program may be distributed according to the terms of the GNU
 * General Public License, version 2 or (at your option) any later version.
@@ -16,7 +16,7 @@
 ***********************************************************************/
 
 static char const RCSID[] =
-"$Id: if.c,v 1.18 2006/01/03 03:05:06 dfs Exp $";
+"$Id$";
 
 #include "pppoe.h"
 
@@ -99,7 +99,7 @@ static	int	dl_addrlen;
 
 static unsigned char *bpfBuffer;	/* Packet filter buffer */
 static int bpfLength = 0;		/* Packet filter buffer length */
-static int bpfSize = 0;		        /* Number of unread bytes in buffer */
+       int bpfSize = 0;		        /* Number of unread bytes in buffer */
 static int bpfOffset = 0;		/* Current offset in bpfBuffer */
 #endif
 
@@ -412,13 +412,14 @@ openInterface(char const *ifname, UINT16_t type, unsigned char *hwaddr)
 * ifname -- name of interface
 * type -- Ethernet frame type
 * hwaddr -- if non-NULL, set to the hardware address
+* mtu    -- if non-NULL, set to the MTU
 *%RETURNS:
 * A raw socket for talking to the Ethernet card.  Exits on error.
 *%DESCRIPTION:
 * Opens a raw Ethernet socket
 ***********************************************************************/
 int
-openInterface(char const *ifname, UINT16_t type, unsigned char *hwaddr)
+openInterface(char const *ifname, UINT16_t type, unsigned char *hwaddr, UINT16_t *mtu)
 {
     int optval=1;
     int fd;
@@ -506,6 +507,7 @@ openInterface(char const *ifname, UINT16_t type, unsigned char *hwaddr)
 		ifname, ifr.ifr_mtu, ETH_DATA_LEN);
 	printErr(buffer);
     }
+    if (mtu) *mtu = ifr.ifr_mtu;
 
 #ifdef HAVE_STRUCT_SOCKADDR_LL
     /* Get interface index */
