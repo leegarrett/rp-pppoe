@@ -34,13 +34,12 @@ binary-arch: build
 	dh_testroot
 	dh_clean -k
 	dh_installdirs usr/sbin usr/share
-	$(MAKE) -C src install RPM_INSTALL_ROOT="`pwd`/debian/pppoe"
+	$(MAKE) -C src install DESTDIR="`pwd`/debian/pppoe"
 #	Now clean out unwanted things, and move others to their places
 	rm -rf debian/pppoe/etc/ppp debian/pppoe/usr/doc
 	rm -rf debian/pppoe/usr/man/man5  # pppoe.conf manpage
 	rm -f debian/pppoe/usr/sbin/adsl-* debian/pppoe/usr/man/man8/adsl-*
 	dh_installdirs etc/ppp/peers
-	mv debian/pppoe/usr/man debian/pppoe/usr/share/man
 	install -m 0640 -o root -g dip debian/dsl-provider \
 		debian/pppoe/etc/ppp/peers/dsl-provider
 	dh_installdocs
