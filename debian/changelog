@@ -1,3 +1,11 @@
+rp-pppoe (3.12-1) UNRELEASED; urgency=medium
+
+  * New upstream release. Closes: #602861.
+  * Bump up Standards-Version to 3.9.8.
+  * Bump up Debhelper compatibility level to 9. Closes: #817658, #816476.
+
+ -- Lee Garrett <lgarrett@rocketjump.eu>  Mon, 13 Jun 2016 02:24:21 +0200
+
 rp-pppoe (3.8-3) unstable; urgency=low
 
   [ Norman Rasmussen ]
