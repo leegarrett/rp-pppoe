@@ -68,48 +68,6 @@ int optFloodDiscovery    = 0;   /* Flood server with discovery requests.
 				   USED FOR STRESS-TESTING ONLY.  DO NOT
 				   USE THE -F OPTION AGAINST A REAL ISP */
 
-#ifdef AUTO_IFUP
-/* for interface activation, based on stripped down source source of ifconfig*/
-#include <linux/if.h>
-/*#include <sys/socket.h> */
-#include <sys/types.h>
-#include <sys/socket.h>
-#include "config.h"
-int skfd = -1;			/* generic raw socket desc.     */
-int sockets_open(int family)
-{
-  int sfd = -1;
-  sfd = socket(AF_INET, SOCK_DGRAM, 0);
-  return sfd;
-}
-/* Like strncpy but make sure the resulting string is always 0 terminated.
- * Ripped from util.c (net-tools package) */  
-char *safe_strncpy(char *dst, const char *src, size_t size)
-{   
-    dst[size-1] = '\0';
-    return strncpy(dst,src,size-1);   
-}
-/* Set a certain interface flag. Ripped from ifconfig.c */
-static int set_flag(char *ifname, short flag)
-{
-    struct ifreq ifr;
-
-    safe_strncpy(ifr.ifr_name, ifname, IFNAMSIZ);
-    if (ioctl(skfd, SIOCGIFFLAGS, &ifr) < 0) {
-	fprintf(stderr, "%s: unknown interface: %s\n", 
-		ifname,	strerror(errno));
-	return (-1);
-    }
-    safe_strncpy(ifr.ifr_name, ifname, IFNAMSIZ);
-    ifr.ifr_flags |= flag;
-    if (ioctl(skfd, SIOCSIFFLAGS, &ifr) < 0) {
-	perror("SIOCSIFFLAGS");
-	return -1;
-    }
-    return (0);
-}
-#endif
-
 PPPoEConnection *Connection = NULL; /* Must be global -- used
 				       in signal handler */
 
@@ -422,7 +380,6 @@ usage(char const *argv0)
 	    "   -k             -- Kill a session with PADT (requires -e)\n"
 	    "   -d             -- Perform discovery, print session info and exit.\n"
 	    "   -f disc:sess   -- Set Ethernet frame types (hex).\n"
-	    "   -H XX:XX:XX:XX:XX:XX -- Force Hardware Address (hex).\n"
 	    "   -h             -- Print usage information.\n\n"
 	    "PPPoE Version %s, Copyright (C) 2001-2015 Roaring Penguin Software Inc.\n"
 	    "PPPoE comes with ABSOLUTELY NO WARRANTY.\n"
@@ -512,18 +469,6 @@ main(int argc, char *argv[])
 	    Eth_PPPOE_Discovery = (UINT16_t) discoveryType;
 	    Eth_PPPOE_Session   = (UINT16_t) sessionType;
 	    break;
-        case 'H':
-	  if (sscanf(optarg, "%2x:%2x:%2x:%2x:%2x:%2x",
-		     &m[0], &m[1], &m[2], &m[3], &m[4], &m[5])!= 6) {
-	    fprintf(stderr,
-		    "Illegal argument to -H: Should be"
-		    "XX:XX:XX:XX:XX:XX in hex\n");
-	    exit(EXIT_FAILURE);
-	  }
-	  for (n=0; n<6; n++) {
-	    conn.myEth[n] = (unsigned char) m[n];
-	  }
-	  break;
 	case 'd':
 	    optSkipSession = 1;
 	    break;
@@ -655,16 +600,6 @@ main(int argc, char *argv[])
 	SET_STRING(conn.ifName, DEFAULT_IF);
 #endif
     }
-
-#ifdef AUTO_IFUP    
-    /* Create a channel to the NET kernel. */
-    if ((skfd = sockets_open(0)) < 0) {
-	perror("socket");
-	exit(1);
-    }
-
-    set_flag(conn.ifName, (IFF_UP | IFF_RUNNING));
-#endif
 
     if (!conn.printACNames) {
 

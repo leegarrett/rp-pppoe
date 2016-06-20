@@ -1,0 +1,25 @@
+Description: retry indefinitely while re-connecting
+ When connecting, do not give up after 30 seconds, but try indefinetely. That
+ way a temporarily unavailable DSLAM will not leave the system disconnected.
+Author: Andreas Barth <aba@not.so.argh.org>  
+Bug-Debian: https://bugs.debian.org/159803
+Bug-Debian: https://bugs.debian.org/222746
+Bug-Debian: https://bugs.debian.org/251261
+Bug-Debian: https://bugs.debian.org/320676
+Bug-Debian: https://bugs.debian.org/222746
+Bug-Debian: https://bugs.debian.org/230707
+Forwarded: no
+Reviewed-By: Andreas Barth <aba@not.so.argh.org>
+Last-Update: 2016-06-21
+
+--- rp-pppoe-3.12.orig/configs/pppoe.conf
++++ rp-pppoe-3.12/configs/pppoe.conf
+@@ -66,7 +66,7 @@ DEFAULTROUTE=yes
+ # to connect forever after pppoe-start is called.  Otherwise, it will
+ # give out after CONNECT_TIMEOUT seconds and will not attempt to
+ # connect again, making it impossible to reach.
+-CONNECT_TIMEOUT=30
++CONNECT_TIMEOUT=0
+ 
+ # How often in seconds pppoe-start polls to check if link is up
+ CONNECT_POLL=2

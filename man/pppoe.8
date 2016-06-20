@@ -104,19 +104,6 @@ you are strongly recommended to use a \fB\-m 1412\fR option.  This avoids
 having to set the MTU on all the hosts on the LAN.
 
 .TP
-.B \-H \fIMAC\fR
-Causes
-.B pppoe
-to use the indicated Ethernet MAC address as the source address for
-sending packets.
-.I MAC
-must be specified in the 
-.IR AA : BB : CC : DD : EE : FF
-syntax.  If this option is specified,
-.B pppoe
-puts the interface into promiscuous mode.
-
-.TP
 .B \-p \fIfile\fR
 Causes \fBpppoe\fR to write its process-ID to the specified file.  This
 can be used to locate and kill \fBpppoe\fR processes.
@@ -252,4 +239,5 @@ with much inspiration from an earlier version by Luke Stras.
 The \fBpppoe\fR home page is \fIhttp://www.roaringpenguin.com/pppoe/\fR.
 
 .SH SEE ALSO
-pppd(8), pppoe-sniff(8), pppoe-server(8), pppoe-relay(8), /usr/share/doc/pppoe/README.Debian.gz
+pppoe-start(8), pppoe-stop(8), pppoe-connect(8), pppd(8), pppoe.conf(5), pppoe-setup(8), pppoe-status(8), pppoe-sniff(8), pppoe-server(8), pppoe-relay(8)
+

@@ -1,0 +1,111 @@
+Description: Add option to change source MAC on Ethernet device
+ This patch adds the -H option to pppoe, which allows to set the source MAC
+ address on the Ethernet device pppoe is running over. Unconditionally sets
+ the device to promiscuous mode.
+Author: Sven Geggus <sven@geggus.net>
+Bug-Debian: https://bugs.debian.org/419677
+Forwarded: no
+Reviewed-By: Andreas Barth <aba@not.so.argh.org>
+Last-Update: 2016-06-21
+
+Index: rp-pppoe/man/pppoe.8
+===================================================================
+--- rp-pppoe.orig/man/pppoe.8
++++ rp-pppoe/man/pppoe.8
+@@ -104,6 +104,19 @@ you are strongly recommended to use a \f
+ having to set the MTU on all the hosts on the LAN.
+ 
+ .TP
++.B \-H \fIMAC\fR
++Causes
++.B pppoe
++to use the indicated Ethernet MAC address as the source address for
++sending packets.
++.I MAC
++must be specified in the 
++.IR AA : BB : CC : DD : EE : FF
++syntax.  If this option is specified,
++.B pppoe
++puts the interface into promiscuous mode.
++
++.TP
+ .B \-p \fIfile\fR
+ Causes \fBpppoe\fR to write its process-ID to the specified file.  This
+ can be used to locate and kill \fBpppoe\fR processes.
+Index: rp-pppoe/src/if.c
+===================================================================
+--- rp-pppoe.orig/src/if.c
++++ rp-pppoe/src/if.c
+@@ -458,9 +458,28 @@ openInterface(char const *ifname, UINT16
+     if (hwaddr) {
+ 	strncpy(ifr.ifr_name, ifname, sizeof(ifr.ifr_name));
+ 	if (ioctl(fd, SIOCGIFHWADDR, &ifr) < 0) {
++	  fatalSys("ioctl(SIOCGIFHWADDR)");
++	}
++	/* fake MAC address if hwaddr != 0:00:00:00:00:00 */
++	if ((hwaddr[0]==0) && (hwaddr[1]==0) && (hwaddr[2]==0) &&
++	    (hwaddr[3]==0) && (hwaddr[4]==0) && (hwaddr[5]==0)) {
++	  /* this is the normal mode, do not fake anything */
++	  memcpy(hwaddr, ifr.ifr_hwaddr.sa_data, ETH_ALEN);
++	} else {
++	  /* this is the mode using a faked Hardware address */
++	  /* switch Interface to promisc Mode */
++	  if (ioctl(fd, SIOCGIFFLAGS, &ifr) < 0) {
++	    	  fatalSys("ioctl(SIOCGIFFLAGS)");
++	  }
++	  ifr.ifr_flags |= IFF_PROMISC;
++	  if (ioctl(fd, SIOCSIFFLAGS, &ifr) < 0) {
++	      fatalSys("ioctl(SIOCSIFFLAGS)");
++	  }
++	  /* satisfy the subsequent checks */
++	  if (ioctl(fd, SIOCGIFHWADDR, &ifr) < 0) {
+ 	    fatalSys("ioctl(SIOCGIFHWADDR)");
++	  }
+ 	}
+-	memcpy(hwaddr, ifr.ifr_hwaddr.sa_data, ETH_ALEN);
+ #ifdef ARPHRD_ETHER
+ 	if (ifr.ifr_hwaddr.sa_family != ARPHRD_ETHER) {
+ 	    char buffer[256];
+Index: rp-pppoe/src/pppoe.c
+===================================================================
+--- rp-pppoe.orig/src/pppoe.c
++++ rp-pppoe/src/pppoe.c
+@@ -422,6 +422,7 @@ usage(char const *argv0)
+ 	    "   -k             -- Kill a session with PADT (requires -e)\n"
+ 	    "   -d             -- Perform discovery, print session info and exit.\n"
+ 	    "   -f disc:sess   -- Set Ethernet frame types (hex).\n"
++	    "   -H XX:XX:XX:XX:XX:XX -- Force Hardware Address (hex).\n"
+ 	    "   -h             -- Print usage information.\n\n"
+ 	    "PPPoE Version %s, Copyright (C) 2001-2015 Roaring Penguin Software Inc.\n"
+ 	    "PPPoE comes with ABSOLUTELY NO WARRANTY.\n"
+@@ -476,9 +477,9 @@ main(int argc, char *argv[])
+     openlog("pppoe", LOG_PID, LOG_DAEMON);
+ 
+ #ifdef DEBUGGING_ENABLED
+-    options = "I:VAT:D:hS:C:UW:sm:np:e:kdf:F:t:";
++    options = "I:VAT:D:hS:C:UW:sm:np:e:kdf:F:t:H:";
+ #else
+-    options = "I:VAT:hS:C:UW:sm:np:e:kdf:F:t:";
++    options = "I:VAT:hS:C:UW:sm:np:e:kdf:F:t:H:";
+ #endif
+     while((opt = getopt(argc, argv, options)) != -1) {
+ 	switch(opt) {
+@@ -511,6 +512,18 @@ main(int argc, char *argv[])
+ 	    Eth_PPPOE_Discovery = (UINT16_t) discoveryType;
+ 	    Eth_PPPOE_Session   = (UINT16_t) sessionType;
+ 	    break;
++        case 'H':
++	  if (sscanf(optarg, "%2x:%2x:%2x:%2x:%2x:%2x",
++		     &m[0], &m[1], &m[2], &m[3], &m[4], &m[5])!= 6) {
++	    fprintf(stderr,
++		    "Illegal argument to -H: Should be"
++		    "XX:XX:XX:XX:XX:XX in hex\n");
++	    exit(EXIT_FAILURE);
++	  }
++	  for (n=0; n<6; n++) {
++	    conn.myEth[n] = (unsigned char) m[n];
++	  }
++	  break;
+ 	case 'd':
+ 	    optSkipSession = 1;
+ 	    break;
