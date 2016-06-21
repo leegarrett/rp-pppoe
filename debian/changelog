@@ -3,8 +3,16 @@ rp-pppoe (3.12-1) UNRELEASED; urgency=medium
   * New upstream release. Closes: #602861.
   * Bump up Standards-Version to 3.9.8.
   * Bump up Debhelper compatibility level to 9. Closes: #817658, #816476.
+  * Change source format to 3.0 (quilt).
+  * debian/copyright: Fix encoding to UTF-8
+  * debian/rules: use dh_prep instead of dh_clean -k
+  * lintian overrides for two files:
+    - /usr/bin/pppoe is shipped with suid
+    - etc/ppp/peers/dsl-provider contains sensitive credentials
+  * Typo fixes.
+  * Don't ship pppoe-setup as it it's not needed. Closes: #426621.
 
- -- Lee Garrett <lgarrett@rocketjump.eu>  Mon, 13 Jun 2016 02:24:21 +0200
+ -- Lee Garrett <lgarrett@rocketjump.eu>  Wed, 22 Jun 2016 01:02:44 +0200
 
 rp-pppoe (3.8-3) unstable; urgency=low
 
