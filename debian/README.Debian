@@ -72,7 +72,7 @@ the connection came up successfully.
   up when you execute the "plog" command) but no data can be send or
   received, check using the "route" command if there is another default
   route (aka gateway) when you start the connection. If so try deleting this
-  route, by removing the corresponding "gateway" line in the 
+  route, by removing the corresponding "gateway" line in the
   /etc/network/interfaces file.
   You may find useful the replacedefaultroute pppd keyword.
 

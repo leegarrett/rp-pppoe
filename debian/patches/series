@@ -3,3 +3,4 @@
 03_man_pages.patch
 04_ignore_broadcasted_pado_packets.patch
 05_change_default_timeout.patch
+06_typo_fixes.patch
