@@ -43,6 +43,7 @@ binary-arch: build
 	rm -rf debian/pppoe/etc/ppp debian/pppoe/usr/doc
 	rm -rf debian/pppoe/usr/man/man5  # pppoe.conf manpage
 	rm -f debian/pppoe/usr/sbin/adsl-* debian/pppoe/usr/man/man8/adsl-*
+	rm -f debian/pppoe/usr/sbin/pppoe-setup
 	dh_installdirs etc/ppp/peers
 	install -m 0640 -o root -g dip debian/dsl-provider \
 		debian/pppoe/etc/ppp/peers/dsl-provider
