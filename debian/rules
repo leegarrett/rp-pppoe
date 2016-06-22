@@ -11,7 +11,6 @@ build-arch: build-stamp
 build-indep: build-stamp
 build-stamp:
 	dh_testdir
-#	test -f configure || (aclocal; autoconf)
 	test -f src/Makefile || (cd src && PPPD=/usr/sbin/pppd ./configure)
 	$(MAKE) -C src
 	touch build-stamp
