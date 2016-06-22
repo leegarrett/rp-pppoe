@@ -40,7 +40,7 @@ binary-arch: build
 	dh_installdirs usr/sbin usr/share
 	$(MAKE) -C src install DESTDIR="`pwd`/debian/pppoe"
 #	Now clean out unwanted things, and move others to their places
-	rm -rf debian/pppoe/etc/ppp debian/pppoe/usr/doc
+	rm -rf debian/pppoe/etc/ppp debian/pppoe/usr/share/doc
 	rm -rf debian/pppoe/usr/man/man5  # pppoe.conf manpage
 	rm -f debian/pppoe/usr/sbin/adsl-* debian/pppoe/usr/man/man8/adsl-*
 	rm -f debian/pppoe/usr/sbin/pppoe-setup
