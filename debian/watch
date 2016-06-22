@@ -1,0 +1,3 @@
+version=3
+opts=pgpsigurlmangle=s/$/.sig/ https://www.roaringpenguin.com/products/pppoe /files/download/rp-pppoe-(.+).tar.gz
+
