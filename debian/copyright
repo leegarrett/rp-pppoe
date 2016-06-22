@@ -1,28 +1,56 @@
-This package was Debianized on the 30th of December 1999 by Christian Hudon
-<chrish@debian.org> using source obtained from
-http://www.roaringpenguin.com/pppoe.html
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: rp-pppoe
+Upstream-Contact: Dianne Skoll <dfs@roaringpengiun.com>
+Source: https://www.roaringpenguin.com/products/pppoe
 
-rp-pppoe is copyright © 1999-2000 Roaring Penguin Software Inc.
+Files: *
+Copyright: 1999-2015 Roaring Penguin Software Inc.
+License: GPL-2.0+
 
-rp-pppoe is licenced under the GNU General Public License. On Debian
-GNU/Linux systems, the full text of the GPL is available under
-/usr/share/common-licenses/GPL.
+Files: debian/*
+Copyright: 1999-2006 Christian Hudon <chrish@debian.org>
+           2006-2007 Andreas Barth <aba@not.so.argh.org>
+           2016 Lee Garrett <lgarrett@rocketjump.eu>
+License: GPL-2.0+
 
-Portions of the Debian version of rp-pppoe have been copied from the
-net-tools package (from the files utils.c and ifconfig.c).  The
-respective copyright statements are:
+Files: debian/patches/01_auto_ifup.patch
+Copyright: 1998 Andi Kleen
+           2001 Eduard Bloch <edi@ka.linux.de>
+License: GPL-2.0+
 
-/* Copyright 1998 by Andi Kleen. Subject to the GPL. */
+Files: debian/patches/02_change_mac_option.patch
+Copyright: 2007 Sven Geggus <sven@geggus.net>
+License: GPL-2.0+
 
- * Author:      Fred N. van Kempen, <waltje@uwalt.nl.mugnet.org>
- *              and others.  Copyright 1993 MicroWalt Corporation
- *
- *              This program is free software; you can redistribute it
- *              and/or  modify it under  the terms of  the GNU General
- *              Public  License as  published  by  the  Free  Software
- *              Foundation;  either  version 2 of the License, or  (at
- *              your option) any later version.
+Files: debian/patches/03_man_pages.patch
+Copyright: 2002 David Kimdon <dwhedon@debian.org>
+License: GPL-2.0+
 
-A patch from Sven Geggus has been applied, which adds the ability to
-set the source MAC address.  According to personal communications,
-this patch is subject to the GPL as well.
+Files: debian/patches/04_ignore_broadcasted_pado_packets.patch
+Copyright: 2005 Stephane Louise <luigi@nerim.net>
+License: GPL-2.0+
+
+Files: debian/patches/05_change_default_timeout.patch
+Copyright: 2007 Andreas Barth <aba@not.so.argh.org>
+License: GPL-2.0+
+
+Files: debian/patches/06_typo_fixes.patch
+Copyright: 2016 Lee Garrett <lgarrett@rocketjump.eu>
+License: GPL-2.0+
+
+License: GPL-2.0+
+ This package is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+ .
+ This package is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License
+ along with this program. If not, see <https://www.gnu.org/licenses/>
+ .
+ On Debian systems, the complete text of the GNU General
+ Public License version 2 can be found in "/usr/share/common-licenses/GPL-2".
