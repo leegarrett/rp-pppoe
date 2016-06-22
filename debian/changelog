@@ -1,4 +1,4 @@
-rp-pppoe (3.12-1) UNRELEASED; urgency=medium
+rp-pppoe (3.12-1) unstable; urgency=medium
 
   * New upstream release. Closes: #602861.
   * Bump up Standards-Version to 3.9.8.
@@ -10,9 +10,14 @@ rp-pppoe (3.12-1) UNRELEASED; urgency=medium
     - /usr/bin/pppoe is shipped with suid
     - etc/ppp/peers/dsl-provider contains sensitive credentials
   * Typo fixes.
-  * Don't ship pppoe-setup as it it's not needed. Closes: #426621.
+  * Don't ship pppoe-setup as it it's not needed. Closes: #426621, #747144.
+  * Add debian/watch file with signature verification.
+  * Add .gitignore to the git repo.
+  * Remove confusing documentation that was accidentally re-introduced between 
+    3.5 and 3.8. Closes: #426621.
+  * Add hardening flags to debian/rules.
 
- -- Lee Garrett <lgarrett@rocketjump.eu>  Wed, 22 Jun 2016 01:02:44 +0200
+ -- Lee Garrett <lgarrett@rocketjump.eu>  Wed, 22 Jun 2016 16:53:15 +0200
 
 rp-pppoe (3.8-3) unstable; urgency=low
 
