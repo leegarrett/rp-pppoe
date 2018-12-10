@@ -1,5 +1,5 @@
 Description: Add option to change source MAC on Ethernet device
- This patch adds the -H option to pppoe, which allows to set the source MAC
+ This patch adds the -H option to pppoe, which allows setting the source MAC
  address on the Ethernet device pppoe is running over. Unconditionally sets
  the device to promiscuous mode.
 Author: Sven Geggus <sven@geggus.net>
