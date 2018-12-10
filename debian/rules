@@ -54,7 +54,7 @@ binary-arch: build
 	dh_link
 	dh_strip
 	dh_compress
-#	dh_fixperms
+	dh_fixperms
 	chgrp dip debian/pppoe/usr/sbin/pppoe
 	chmod u+s debian/pppoe/usr/sbin/pppoe
 	chmod o-x debian/pppoe/usr/sbin/pppoe

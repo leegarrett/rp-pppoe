@@ -1,3 +1,11 @@
+rp-pppoe (3.12-1.1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Run dh_fixperms during build to make build reproducible
+    (Closes: #836837).
+
+ -- Petter Reinholdtsen <pere@debian.org>  Sun, 25 Dec 2016 10:09:52 +0000
+
 rp-pppoe (3.12-1) unstable; urgency=medium
 
   * New upstream release. Closes: #602861.
