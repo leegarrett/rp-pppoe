@@ -8,11 +8,9 @@ Forwarded: no
 Reviewed-By: Andreas Barth <aba@not.so.argh.org>
 Last-Update: 2016-06-21
 
-Index: rp-pppoe/man/pppoe.8
-===================================================================
---- rp-pppoe.orig/man/pppoe.8
-+++ rp-pppoe/man/pppoe.8
-@@ -104,6 +104,19 @@ you are strongly recommended to use a \f
+--- a/man/pppoe.8
++++ b/man/pppoe.8
+@@ -104,6 +104,19 @@
  having to set the MTU on all the hosts on the LAN.
  
  .TP
@@ -32,11 +30,9 @@ Index: rp-pppoe/man/pppoe.8
  .B \-p \fIfile\fR
  Causes \fBpppoe\fR to write its process-ID to the specified file.  This
  can be used to locate and kill \fBpppoe\fR processes.
-Index: rp-pppoe/src/if.c
-===================================================================
---- rp-pppoe.orig/src/if.c
-+++ rp-pppoe/src/if.c
-@@ -458,9 +458,28 @@ openInterface(char const *ifname, UINT16
+--- a/src/if.c
++++ b/src/if.c
+@@ -460,9 +460,28 @@
      if (hwaddr) {
  	strncpy(ifr.ifr_name, ifname, sizeof(ifr.ifr_name));
  	if (ioctl(fd, SIOCGIFHWADDR, &ifr) < 0) {
@@ -66,11 +62,9 @@ Index: rp-pppoe/src/if.c
  #ifdef ARPHRD_ETHER
  	if (ifr.ifr_hwaddr.sa_family != ARPHRD_ETHER) {
  	    char buffer[256];
-Index: rp-pppoe/src/pppoe.c
-===================================================================
---- rp-pppoe.orig/src/pppoe.c
-+++ rp-pppoe/src/pppoe.c
-@@ -422,6 +422,7 @@ usage(char const *argv0)
+--- a/src/pppoe.c
++++ b/src/pppoe.c
+@@ -419,6 +419,7 @@
  	    "   -k             -- Kill a session with PADT (requires -e)\n"
  	    "   -d             -- Perform discovery, print session info and exit.\n"
  	    "   -f disc:sess   -- Set Ethernet frame types (hex).\n"
@@ -78,7 +72,7 @@ Index: rp-pppoe/src/pppoe.c
  	    "   -h             -- Print usage information.\n\n"
  	    "PPPoE Version %s, Copyright (C) 2001-2015 Roaring Penguin Software Inc.\n"
  	    "PPPoE comes with ABSOLUTELY NO WARRANTY.\n"
-@@ -476,9 +477,9 @@ main(int argc, char *argv[])
+@@ -473,9 +474,9 @@
      openlog("pppoe", LOG_PID, LOG_DAEMON);
  
  #ifdef DEBUGGING_ENABLED
@@ -90,7 +84,7 @@ Index: rp-pppoe/src/pppoe.c
  #endif
      while((opt = getopt(argc, argv, options)) != -1) {
  	switch(opt) {
-@@ -511,6 +512,18 @@ main(int argc, char *argv[])
+@@ -508,6 +509,18 @@
  	    Eth_PPPOE_Discovery = (UINT16_t) discoveryType;
  	    Eth_PPPOE_Session   = (UINT16_t) sessionType;
  	    break;

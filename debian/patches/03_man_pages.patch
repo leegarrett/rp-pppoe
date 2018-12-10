@@ -8,11 +8,9 @@ Forwarded: no
 Reviewed-By: Andreas Barth <aba@not.so.argh.org>
 Last-Update: 2016-06-21
 
-Index: rp-pppoe/man/pppoe-relay.8
-===================================================================
---- rp-pppoe.orig/man/pppoe-relay.8
-+++ rp-pppoe/man/pppoe-relay.8
-@@ -119,6 +119,4 @@ clients on the eth1, eth2 and eth3 netwo
+--- a/man/pppoe-relay.8
++++ b/man/pppoe-relay.8
+@@ -119,6 +119,4 @@
  The \fBpppoe\fR home page is \fIhttp://www.roaringpenguin.com/pppoe/\fR.
  
  .SH SEE ALSO
@@ -20,11 +18,9 @@ Index: rp-pppoe/man/pppoe-relay.8
 -pppoe(8), pppoe-setup(8), pppoe-status(8), pppoe-sniff(8), pppoe-server(8)
 -
 +pppd(8), pppoe(8), pppoe-sniff(8), pppoe-relay(8), /usr/share/doc/pppoe/README.Debian.gz
-Index: rp-pppoe/man/pppoe-server.8
-===================================================================
---- rp-pppoe.orig/man/pppoe-server.8
-+++ rp-pppoe/man/pppoe-server.8
-@@ -203,6 +203,4 @@ It is \fInot\fR a high-performance serve
+--- a/man/pppoe-server.8
++++ b/man/pppoe-server.8
+@@ -203,6 +203,4 @@
  The \fBpppoe\fR home page is \fIhttp://www.roaringpenguin.com/pppoe/\fR.
  
  .SH SEE ALSO
@@ -32,11 +28,9 @@ Index: rp-pppoe/man/pppoe-server.8
 -pppoe(8), pppoe-setup(8), pppoe-status(8), pppoe-sniff(8), pppoe-relay(8)
 -
 +pppd(8), pppoe(8), pppoe-sniff(8), pppoe-relay(8), /usr/share/doc/pppoe/README.Debian.gz
-Index: rp-pppoe/man/pppoe-sniff.8
-===================================================================
---- rp-pppoe.orig/man/pppoe-sniff.8
-+++ rp-pppoe/man/pppoe-sniff.8
-@@ -72,6 +72,4 @@ exit.
+--- a/man/pppoe-sniff.8
++++ b/man/pppoe-sniff.8
+@@ -72,6 +72,4 @@
  The \fBpppoe\fR home page is \fIhttp://www.roaringpenguin.com/pppoe/\fR.
  
  .SH SEE ALSO
@@ -44,11 +38,9 @@ Index: rp-pppoe/man/pppoe-sniff.8
 -pppoe(8), pppoe-setup(8), pppoe-status(8), pppoe-server(8), pppoe-relay(8)
 -
 +pppd(8), pppoe(8), pppoe-sniff(8), pppoe-relay(8), /usr/share/doc/pppoe/README.Debian.gz
-Index: rp-pppoe/man/pppoe.8
-===================================================================
---- rp-pppoe.orig/man/pppoe.8
-+++ rp-pppoe/man/pppoe.8
-@@ -252,5 +252,4 @@ with much inspiration from an earlier ve
+--- a/man/pppoe.8
++++ b/man/pppoe.8
+@@ -252,5 +252,4 @@
  The \fBpppoe\fR home page is \fIhttp://www.roaringpenguin.com/pppoe/\fR.
  
  .SH SEE ALSO
