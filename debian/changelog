@@ -25,7 +25,7 @@ rp-pppoe (3.12-1) unstable; urgency=medium
     3.5 and 3.8. Closes: #426621.
   * Add hardening flags to debian/rules.
 
- -- Lee Garrett <lgarrett@rocketjump.eu>  Wed, 22 Jun 2016 16:53:15 +0200
+ -- Lee Garrett <debian@rocketjump.eu>  Wed, 22 Jun 2016 16:53:15 +0200
 
 rp-pppoe (3.8-3) unstable; urgency=low
 
